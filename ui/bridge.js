@@ -6,7 +6,7 @@
   document.documentElement.classList.add('native');
   let seq = 0;
   const pending = {};
-  const handlers = { state: [], alert: [] };
+  const handlers = {};
   wv.addEventListener('message', (e) => {
     const m = e.data || {};
     if (m.type === 'reply') {
@@ -25,8 +25,9 @@
 
   window.api = {
     getState: () => invoke('get-state'),
-    onState: (cb) => handlers.state.push(cb),
-    onAlert: (cb) => handlers.alert.push(cb),
+    onState: (cb) => (handlers.state = handlers.state || []).push(cb),
+    onAlert: (cb) => (handlers.alert = handlers.alert || []).push(cb),
+    on: (name, cb) => (handlers[name] = handlers[name] || []).push(cb),
     action: (name) => send('widget-action', name),
     setTrayIcon: (dataUrl) => send('tray-icon', dataUrl),
     loadSettings: () => invoke('settings-load'),

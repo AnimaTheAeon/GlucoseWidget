@@ -181,23 +181,69 @@ namespace GlucoseWidget
         }
     }
 
+    // Built once in the background and then kept: closing just hides it, so it opens instantly.
     public class SettingsForm : Form
     {
+        readonly App app;
+        readonly WebView2 web;
+        bool ready, wantShow, forceClose, warming;
+
         public SettingsForm(App app)
         {
+            this.app = app;
             Text = App.Name + " Settings";
-            StartPosition = FormStartPosition.CenterScreen;
+            StartPosition = FormStartPosition.Manual;
             BackColor = Color.FromArgb(20, 25, 34);
             MinimizeBox = false; MaximizeBox = false;
             try { Icon = new Icon(Path.Combine(App.AppFolder, "icon.ico")); } catch { /* default icon */ }
-            var web = new WebView2 { Dock = DockStyle.Fill, DefaultBackgroundColor = Color.FromArgb(20, 25, 34) };
+            web = new WebView2 { Dock = DockStyle.Fill, DefaultBackgroundColor = Color.FromArgb(20, 25, 34) };
             Controls.Add(web);
-            HandleCreated += (s, e) => { ClientSize = new Size(470 * DeviceDpi / 96, 800 * DeviceDpi / 96); CenterToScreen(); };
-            Load += async (s, e) =>
+            FormClosing += (s, e) => { if (!forceClose && e.CloseReason == CloseReason.UserClosing) { e.Cancel = true; Hide(); } };
+        }
+
+        // Creates the window and loads the page without showing anything.
+        public async void Warm()
+        {
+            if (warming) return;
+            warming = true;
+            try
             {
-                try { await WebHost.Attach(app, this, web, "settings.html"); }
-                catch (Exception ex) { Log.Write("settings page failed", ex.ToString()); }
-            };
+                CreateHandle();
+                ClientSize = new Size(470 * DeviceDpi / 96, 800 * DeviceDpi / 96);
+                await WebHost.Attach(app, this, web, "settings.html");
+                web.CoreWebView2.NavigationCompleted += (s, e) =>
+                {
+                    ready = true;
+                    if (wantShow) { wantShow = false; ShowNow(); }
+                };
+            }
+            catch (Exception ex) { Log.Write("settings page failed", ex.ToString()); }
+        }
+
+        public void Present()
+        {
+            if (!ready) { wantShow = true; Warm(); return; }
+            // fresh values every time it opens
+            WebHost.Post(web.CoreWebView2, new Dictionary<string, object> { { "type", "event" }, { "name", "refresh" }, { "data", null } });
+            ShowNow();
+        }
+
+        void ShowNow()
+        {
+            if (!Visible)
+            {
+                var a = Screen.FromPoint(Cursor.Position).WorkingArea;
+                Location = new Point(a.Left + (a.Width - Width) / 2, a.Top + Math.Max(0, (a.Height - Height) / 2));
+                Show();
+            }
+            if (WindowState == FormWindowState.Minimized) WindowState = FormWindowState.Normal;
+            Activate();
+        }
+
+        public void ForceClose()
+        {
+            forceClose = true;
+            Close();
         }
     }
 }
