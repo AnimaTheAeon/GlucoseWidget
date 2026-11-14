@@ -99,6 +99,8 @@ namespace GlucoseWidget
         IGlucoseSource BuildSource(Settings s, string password, string nsSecret) =>
             s.source == "nightscout" ? (IGlucoseSource)new Nightscout(s.nsUrl, nsSecret) : new DexcomShare(s.username, password, s.region);
 
+        public bool SeeThrough => EffectiveTheme() == "glass" && Settings.glassClear;
+
         public string EffectiveTheme()
         {
             var t = Settings.theme;
@@ -112,7 +114,8 @@ namespace GlucoseWidget
             { "snoozeUntil", alertState.snoozeUntil },
             { "settings", new Dictionary<string, object> {
                 { "high", Settings.high }, { "low", Settings.low }, { "volume", Settings.volume },
-                { "staleMin", Settings.staleMin }, { "snoozeMin", Settings.snoozeMin }, { "theme", EffectiveTheme() } } },
+                { "staleMin", Settings.staleMin }, { "snoozeMin", Settings.snoozeMin }, { "theme", EffectiveTheme() },
+                { "glassClear", Settings.glassClear }, { "glassAmount", Settings.glassAmount } } },
         };
 
         void PushState()
@@ -379,6 +382,8 @@ namespace GlucoseWidget
             into.snoozeMin = Settings.Num(f.ContainsKey("snoozeMin") ? f["snoozeMin"] : null, 5, 240, 30);
             into.volume = Settings.Num(f.ContainsKey("volume") ? f["volume"] : null, 0, 1, 0.8);
             into.minToTray = Json.Bool(f, "minToTray");
+            into.glassClear = Json.Bool(f, "glassClear");
+            into.glassAmount = Settings.Num(f.ContainsKey("glassAmount") ? f["glassAmount"] : null, 0, 1, 0.5);
             return into;
         }
 
@@ -405,7 +410,7 @@ namespace GlucoseWidget
                         { "themes", Themes.List(ThemesFolder) }, { "theme", EffectiveTheme() },
                         { "source", s.source }, { "username", s.username }, { "region", s.region }, { "nsUrl", s.nsUrl },
                         { "high", s.high }, { "low", s.low }, { "repeatLow", s.repeatLow }, { "repeatHigh", s.repeatHigh },
-                        { "staleMin", s.staleMin }, { "snoozeMin", s.snoozeMin }, { "volume", s.volume }, { "minToTray", s.minToTray },
+                        { "staleMin", s.staleMin }, { "snoozeMin", s.snoozeMin }, { "volume", s.volume }, { "minToTray", s.minToTray }, { "glassClear", s.glassClear }, { "glassAmount", s.glassAmount },
                         { "hasPassword", Password != "" }, { "hasNsSecret", NsSecret != "" }, { "canEncrypt", true },
                     };
                 }
@@ -436,6 +441,7 @@ namespace GlucoseWidget
                     Settings.Save();
                     Log.Write("settings saved, source", Settings.source, "theme", Settings.theme);
                     ApplyTaskbar();
+                    widget?.ApplyGlass();
                     latest = null; history = new List<Reading>();
                     BuildMenu();
                     RestartPolling();
