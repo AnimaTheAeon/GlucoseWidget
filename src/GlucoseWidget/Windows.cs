@@ -142,7 +142,7 @@ namespace GlucoseWidget
             Controls.Add(web);
             ClientSize = new Size(W, H);
 
-            HandleCreated += (s, e) => { Native.Round(Handle); ApplySize(); Place(); ApplyGlass(); };
+            HandleCreated += (s, e) => { Native.Round(Handle); ApplySize(); Place(); ApplyGlass(); Log.Write("widget dpi", DeviceDpi, "size", Width + "x" + Height); };
             Load += async (s, e) =>
             {
                 try { await WebHost.Attach(app, this, web, "widget.html"); ready = true; }
