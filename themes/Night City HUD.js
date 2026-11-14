@@ -90,6 +90,14 @@
     75% { transform: translate(-1px, 0); text-shadow: 3px 0 #fcee0a, -2px 0 #5ef6ff; }
     100% { transform: translate(0); } }
   @keyframes cpflash { 50% { background: linear-gradient(90deg, color-mix(in srgb, var(--fc, #ff3b3b) 45%, transparent), rgba(70,12,18,.18)); } }
+
+  /* frame */
+  body.neon #card::after { content: ""; position: absolute; inset: 0; border-radius: 8px; pointer-events: none; z-index: 30;
+    border: 1px solid rgba(255,70,70,.55);
+    background:
+      linear-gradient(#5ef6ff, #5ef6ff) left 3px top 3px / 14px 2px no-repeat, linear-gradient(#5ef6ff, #5ef6ff) left 3px top 3px / 2px 14px no-repeat,
+      linear-gradient(#5ef6ff, #5ef6ff) right 3px bottom 3px / 14px 2px no-repeat, linear-gradient(#5ef6ff, #5ef6ff) right 3px bottom 3px / 2px 14px no-repeat,
+      linear-gradient(#ff3b3b, #ff3b3b) right 3px top 3px / 6px 2px no-repeat, linear-gradient(#ff3b3b, #ff3b3b) left 3px bottom 3px / 6px 2px no-repeat; }
 `,
     html: String.raw`
   <div id="cp">

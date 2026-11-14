@@ -74,6 +74,10 @@
   body.reactor .ronly { display: block; }
   body.reactor #tl { margin-top: 5px; }
   body.reactor #timer { display: flex; gap: 2px; justify-content: flex-end; align-items: center; margin-top: 2px; transform: skewX(-5deg); }
+
+  /* frame */
+  body.reactor #card::after { content: ""; position: absolute; inset: 0; border-radius: 8px; pointer-events: none; z-index: 30;
+    box-shadow: inset 0 0 0 1px #0a0a14, inset 0 0 0 3px #c8ccd8, inset 0 0 0 4px #5a5e70, inset 0 0 0 5px #0a0a14; }
 `,
     html: '',
     render(c) {

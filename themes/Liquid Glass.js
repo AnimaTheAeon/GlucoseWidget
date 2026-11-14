@@ -56,14 +56,17 @@
       radial-gradient(ellipse at 12% -10%, color-mix(in srgb, var(--lc) 34%, transparent), transparent 58%),
       radial-gradient(ellipse at 105% 110%, color-mix(in srgb, var(--lc) 22%, transparent), transparent 55%),
       radial-gradient(ellipse at 60% 40%, rgba(120,130,170,.10), transparent 70%),
-      linear-gradient(160deg, rgba(38,40,48,calc(.94 * var(--ga, 1))), rgba(16,17,22,calc(.95 * var(--ga, 1))));
+      linear-gradient(160deg, rgba(22,24,30,max(.8, calc(.94 * var(--ga, 1)))), rgba(8,9,12,max(.86, calc(.96 * var(--ga, 1)))));
     box-shadow: inset 0 1.5px 0 rgba(255,255,255,.42), inset 0 -1px 0 rgba(255,255,255,.10), inset 1px 0 0 rgba(255,255,255,.16),
       inset -1px 0 0 rgba(255,255,255,.08), inset 0 0 24px rgba(255,255,255,.05), 0 0 0 .5px rgba(0,0,0,.6), 0 3px 6px rgba(0,0,0,.35); }
   #lg::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
     background: linear-gradient(170deg, rgba(255,255,255,.13), transparent 32%); }
   /* see-through mode: Windows blurs the desktop behind the window; the page lets it show */
   html.seethrough, html.seethrough body { background: transparent !important; }
-  html.seethrough #lg { text-shadow: 0 1px 2px rgba(0,0,0,.35); }
+  /* see-through stays dark mode: a dark smoky tint always sits under the glass, even on a bright desktop */
+  html.seethrough #lg { text-shadow: 0 1px 3px rgba(0,0,0,.55); }
+  html.seethrough #lg #lgVal { background: linear-gradient(180deg, #ffffff 0%, #ffffff 50%, rgba(255,255,255,.9)); -webkit-background-clip: text; }
+  html.seethrough #lg::before { background: linear-gradient(170deg, rgba(255,255,255,.10), transparent 32%); }
   #lg.ok { --lc: #30d158; } #lg.high { --lc: #ff9f0a; } #lg.low { --lc: #ff453a; } #lg.stale { --lc: #8e8e93; }
   #lg .top { position: relative; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
   #lg .top .ago { font-weight: 500; color: rgba(255,255,255,.55); font-size: 11px; }
@@ -92,6 +95,13 @@
   body.glass #snooze.on::before { --gwi: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cdefs%3E%3Cmask%20id='m'%3E%3Crect%20width='24'%20height='24'%20fill='white'/%3E%3Cpath%20d='M2,2%20L22,22'%20stroke='black'%20stroke-width='4.6'/%3E%3C/mask%3E%3C/defs%3E%3Cpath%20fill='black'%20mask='url(%23m)'%20d='M12,2.2%20a1.5,1.5%200%200%201%201.5,1.5%20v.7%20A6.3,6.3%200%200%201%2018.3,10.6%20v4.2%20l2,2.4%20v1.2%20H3.7%20v-1.2%20l2,-2.4%20v-4.2%20A6.3,6.3%200%200%201%2010.5,4.4%20v-.7%20A1.5,1.5%200%200%201%2012,2.2%20Z%20M9.4,19.8%20h5.2%20a2.6,2.6%200%200%201%20-5.2,0%20Z'/%3E%3Cpath%20d='M3,3%20L21,21'%20stroke='black'%20stroke-width='2.2'%20stroke-linecap='round'/%3E%3C/svg%3E"); background: #ffd27a; }
   body.glass #gear::before { --gwi: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20fill='black'%20fill-rule='evenodd'%20d='M19.11,9.32%20L22.39,9.89%20L22.39,14.11%20L19.11,14.68%20L18.92,15.14%20L20.84,17.86%20L17.86,20.84%20L15.14,18.92%20L14.68,19.11%20L14.11,22.39%20L9.89,22.39%20L9.32,19.11%20L8.86,18.92%20L6.14,20.84%20L3.16,17.86%20L5.08,15.14%20L4.89,14.68%20L1.61,14.11%20L1.61,9.89%20L4.89,9.32%20L5.08,8.86%20L3.16,6.14%20L6.14,3.16%20L8.86,5.08%20L9.32,4.89%20L9.89,1.61%20L14.11,1.61%20L14.68,4.89%20L15.14,5.08%20L17.86,3.16%20L20.84,6.14%20L18.92,8.86%20Z%20M12,8.6%20A3.4,3.4%200%201%200%2012,15.4%20A3.4,3.4%200%201%200%2012,8.6%20Z'/%3E%3C/svg%3E"); }
   body.glass #min::before { --gwi: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2024%2024'%3E%3Cpath%20d='M12,3.5%20V13.5%20M7.2,9%20L12,13.8%20L16.8,9'%20fill='none'%20stroke='black'%20stroke-width='2.6'%20stroke-linecap='round'%20stroke-linejoin='round'/%3E%3Cpath%20d='M4,18.5%20H20'%20stroke='black'%20stroke-width='2.8'%20stroke-linecap='round'/%3E%3C/svg%3E"); }
+
+  /* frame: a glass rim tinted by the zone colour */
+  body.glass #card::after { content: ""; position: absolute; inset: 0; border-radius: 8px; pointer-events: none; z-index: 30; --fc: #30d158;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.22), inset 0 1.5px 0 rgba(255,255,255,.5), inset 0 0 0 2.5px color-mix(in srgb, var(--fc) 45%, transparent), inset 0 0 18px color-mix(in srgb, var(--fc) 20%, transparent); }
+  body.glass #card:has(#lg.high)::after { --fc: #ff9f0a; }
+  body.glass #card:has(#lg.low)::after { --fc: #ff453a; }
+  body.glass #card:has(#lg.stale)::after { --fc: #8e8e93; }
 `,
     html: String.raw`
   <div id="lg" class="stale">
