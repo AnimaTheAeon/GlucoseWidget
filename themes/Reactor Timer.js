@@ -1,5 +1,5 @@
-// @theme {"id": "reactor", "name": "Reactor timer", "width": 300, "height": 180}
-// Glucose Widget theme: "Reactor timer". Delete this file to remove the theme; put it back to restore it.
+// @theme {"id": "reactor", "name": "Reactor Timer", "width": 300, "height": 180}
+// Glucose Widget theme: "Reactor Timer". Delete this file to remove the theme; put it back to restore it.
 (function () {
   const RC = { ok: '#e8f0ff', high: '#ffc000', low: '#ff3030', stale: '#7d86a0', none: '#7d86a0' };
   const SEG = { 0: 'abcdef', 1: 'bc', 2: 'abdeg', 3: 'abcdg', 4: 'bcfg', 5: 'acdfg', 6: 'acdefg', 7: 'abc', 8: 'abcdefg', 9: 'abcdfg', '-': 'g', L: 'def', H: 'bcefg' };

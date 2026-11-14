@@ -1,5 +1,5 @@
-// @theme {"id": "farm", "name": "Farm sign", "width": 300, "height": 180}
-// Glucose Widget theme: "Farm sign". Delete this file to remove the theme; put it back to restore it.
+// @theme {"id": "farm", "name": "Farm Sign", "width": 300, "height": 180}
+// Glucose Widget theme: "Farm Sign". Delete this file to remove the theme; put it back to restore it.
 (function () {
   // "Farm sign" theme: drawn as real pixel art on a small canvas (130x90), shown at 2x.
   (function () {

@@ -45,6 +45,10 @@ namespace GlucoseWidget
             Log.Folder = DataFolder;
             Log.Write("started, version", Application.ProductVersion);
             Settings = Settings.Load();
+            // themes used to be saved by their short file names
+            var renamed = new Dictionary<string, string> { { "classic", "Classic" }, { "reactor", "Reactor Timer" }, { "farm", "Farm Sign" },
+                { "neon", "Night City HUD" }, { "og", "Green Orb" }, { "glass", "Dark Glass" } };
+            if (renamed.TryGetValue(Settings.theme ?? "", out var newName)) { Settings.theme = newName; Settings.Save(); }
             ui = new Control();
             ui.CreateControl();
 
@@ -99,12 +103,12 @@ namespace GlucoseWidget
         IGlucoseSource BuildSource(Settings s, string password, string nsSecret) =>
             s.source == "nightscout" ? (IGlucoseSource)new Nightscout(s.nsUrl, nsSecret) : new DexcomShare(s.username, password, s.region);
 
-        public bool SeeThrough => EffectiveTheme() == "glass" && Settings.glassClear;
+        public bool SeeThrough => Settings.glassClear && Themes.List(ThemesFolder).Any(t => t.id == EffectiveTheme() && t.key == "glass");
 
         public string EffectiveTheme()
         {
             var t = Settings.theme;
-            return Themes.List(ThemesFolder).Any(x => x.id == t) ? t : "classic";
+            return Themes.List(ThemesFolder).Any(x => x.id == t) ? t : "Classic";
         }
 
         // ---------- state for the widget page ----------
@@ -368,7 +372,7 @@ namespace GlucoseWidget
 
         Settings CleanForm(Dictionary<string, object> f, Settings into)
         {
-            into.theme = Themes.List(ThemesFolder).Any(t => t.id == Json.Str(f, "theme")) ? Json.Str(f, "theme") : "classic";
+            into.theme = Themes.List(ThemesFolder).Any(t => t.id == Json.Str(f, "theme")) ? Json.Str(f, "theme") : "Classic";
             into.source = Json.Str(f, "source") == "nightscout" ? "nightscout" : "share";
             into.username = Json.Str(f, "username").Trim();
             var region = Json.Str(f, "region");

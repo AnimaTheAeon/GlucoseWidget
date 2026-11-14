@@ -307,13 +307,15 @@ namespace GlucoseWidget
     // Its first line says what it is:  // @theme {"id":"farm","name":"Farm sign",...}
     public class ThemeInfo
     {
-        public string id { get; set; }
+        public string id { get; set; }   // the file name without ".js" (also what Settings shows)
         public string name { get; set; }
+        public string key { get; set; }  // the theme's own style key from its first line
     }
 
     public static class Themes
     {
-        public static readonly ThemeInfo Classic = new ThemeInfo { id = "classic", name = "Classic (with graph)" };
+        public static readonly ThemeInfo Classic = new ThemeInfo { id = "Classic", name = "Classic", key = "classic" };
+        public static readonly System.Text.RegularExpressions.Regex SafeName = new System.Text.RegularExpressions.Regex(@"^[A-Za-z0-9][A-Za-z0-9 _()&'.-]{0,60}$");
 
         public static List<ThemeInfo> List(string folder)
         {
@@ -323,7 +325,7 @@ namespace GlucoseWidget
             foreach (var file in files.OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
             {
                 var stem = Path.GetFileNameWithoutExtension(file);
-                if (!Regex.IsMatch(stem, "^[a-z0-9_-]+$", RegexOptions.IgnoreCase)) continue;
+                if (!SafeName.IsMatch(stem) || stem.Equals("Classic", StringComparison.OrdinalIgnoreCase)) continue;
                 try
                 {
                     string head;
@@ -331,10 +333,9 @@ namespace GlucoseWidget
                     var m = Regex.Match(head, @"@theme\s+(\{[^\n]*\})");
                     if (!m.Success) continue;
                     var meta = Json.Obj(Json.Read(m.Groups[1].Value));
-                    var id = Json.Str(meta, "id");
-                    if (id != stem) continue;
-                    var name = Json.Str(meta, "name");
-                    found.Add(new ThemeInfo { id = id, name = (name == "" ? id : name.Length > 40 ? name.Substring(0, 40) : name) });
+                    var key = Json.Str(meta, "id");
+                    if (key == "") continue;
+                    found.Add(new ThemeInfo { id = stem, name = stem, key = key });
                 }
                 catch (Exception e) { Log.Write("theme file skipped", Path.GetFileName(file), e.Message); }
             }

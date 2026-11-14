@@ -1,5 +1,5 @@
-// @theme {"id": "neon", "name": "Night city HUD", "width": 300, "height": 180}
-// Glucose Widget theme: "Night city HUD". Delete this file to remove the theme; put it back to restore it.
+// @theme {"id": "neon", "name": "Night City HUD", "width": 300, "height": 180}
+// Glucose Widget theme: "Night City HUD". Delete this file to remove the theme; put it back to restore it.
 (function () {
   const PAL = { ok: '#5ef6ff', high: '#fcee0a', low: '#ff3b3b', stale: '#8a6a6e' };
   function drawCpSpark(s) {

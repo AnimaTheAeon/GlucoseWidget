@@ -20,8 +20,11 @@ let lastCtx = null;
 
 window.GlucoseWidget = {
   registerTheme(def) {
-    if (!def || !def.id || THEMES[def.id]) return;
-    THEMES[def.id] = def;
+    // the theme's name is its file name (e.g. "Green Orb.js" -> "Green Orb")
+    const src = document.currentScript && document.currentScript.src;
+    const name = src ? decodeURIComponent(src.split('/').pop().replace(/\.js$/i, '')) : def && def.id;
+    if (!def || !def.id || !name || THEMES[name]) return;
+    THEMES[name] = def;
     if (def.css) { const el = document.createElement('style'); el.dataset.theme = def.id; el.textContent = def.css; document.head.appendChild(el); }
     if (def.html) $('card').insertAdjacentHTML('beforeend', def.html);
     try { if (def.init) def.init({ action: (name) => window.api.action(name) }); } catch (e) { console.error(e); }
@@ -30,16 +33,16 @@ window.GlucoseWidget = {
 };
 
 function activeTheme(id) {
-  if (!id || id === 'classic') return 'classic';
+  if (!id || id.toLowerCase() === 'classic') return 'Classic';
   if (THEMES[id]) return id;
-  if (!themeLoad[id] && /^[a-z0-9_-]+$/i.test(id)) {
+  if (!themeLoad[id] && /^[A-Za-z0-9][A-Za-z0-9 _()&'.-]{0,60}$/.test(id)) {
     themeLoad[id] = 'loading';
     const el = document.createElement('script');
-    el.src = `https://themes.glucose/${id}.js`;
+    el.src = `https://themes.glucose/${encodeURIComponent(id)}.js`;
     el.onerror = () => { themeLoad[id] = 'failed'; console.warn('theme file missing:', id); render(); };
     document.head.appendChild(el);
   }
-  return 'classic';
+  return 'Classic';
 }
 
 // ---------- classic theme pieces ----------
@@ -96,8 +99,9 @@ function render() {
   if (!state) return;
   const s = state; const r = s.reading; const now = Date.now();
   const theme = activeTheme(s.settings.theme);
-  document.body.className = theme;
-  const clear = theme === 'glass' && document.documentElement.classList.contains('native') && Boolean(s.settings.glassClear);
+  const tdef = THEMES[theme];
+  document.body.className = tdef ? tdef.id : 'classic';
+  const clear = Boolean(tdef && tdef.id === 'glass') && document.documentElement.classList.contains('native') && Boolean(s.settings.glassClear);
   document.documentElement.classList.toggle('seethrough', clear);
   document.documentElement.style.setProperty('--ga', clear ? String(Math.max(0.08, 1 - Number(s.settings.glassAmount || 0) * 0.92)) : '1');
   const zone = COLORS[s.zone] ? s.zone : 'none';

@@ -79,25 +79,25 @@ Want it back? Put the file back. Then open Settings and the list
 updates. (Classic is built in and can't be removed, so the widget
 always has something to show.)
 
-  reactor.js = Reactor timer     farm.js  = Farm sign
-  neon.js    = Night city HUD    og.js    = Green orb
-  glass.js   = Dark Glass
+  Every file is named after its look, for example
+  "Green Orb.js" is the Green Orb look. What you see in
+  Settings is the file's name.
 
 Only put theme files here that came from Claude or that you trust,
 because they run inside the widget.
 
 The looks (pick in Settings > Look > Theme):
 - Classic        = dark box with a 3-hour graph.
-- Reactor timer  = blue box with digital-clock digits. The small timer
+- Reactor Timer  = blue box with digital-clock digits. The small timer
                    counts down to your next reading (one comes every
                    5 minutes). If it says LATE, the reading did not come
                    and the timer counts up instead. In this look the
                    in-range number is white instead of green.
-- Farm sign      = wooden sign on a starry sky, pixel-art style.
+- Farm Sign      = wooden sign on a starry sky, pixel-art style.
                    The sky turns sunset for high and red for low.
-- Night city HUD = dark red screen with a menu list. The one you are in
+- Night City HUD = dark red screen with a menu list. The one you are in
                    gets the cyan box. Blue in range, yellow high, red low.
-- Green orb      = glowing orb on a dark green dashboard. The glowing
+- Green Orb      = glowing orb on a dark green dashboard. The glowing
                    tube along the bottom is your last 3 hours, with
                    light flowing along it. The two dotted lines are
                    your high and low limits.
