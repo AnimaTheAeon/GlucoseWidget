@@ -284,6 +284,10 @@
   body.farm #card.alarm { animation: none; }
   body.farm #card.alarm #farm { animation: fpulse 0.8s ease-in-out 30; }
   @keyframes fpulse { 50% { filter: brightness(1.35) saturate(1.4); } }
+
+  /* frame */
+  body.farm #card::after { content: ""; position: absolute; inset: 0; border-radius: 8px; pointer-events: none; z-index: 30;
+    box-shadow: inset 0 0 0 2px #4a2208, inset 0 0 0 4px #c27236, inset 0 0 0 5px #e39a50, inset 0 0 0 6px #8a4519, inset 0 0 0 7px #4a2208; }
 `,
     html: String.raw`
   <canvas id="farm"></canvas>
