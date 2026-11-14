@@ -1,0 +1,148 @@
+GLUCOSE WIDGET - START HERE
+===========================
+
+What this is
+------------
+A little box that sits on your desktop and shows your Dexcom number.
+It dings when you go ABOVE 250 or BELOW 70, and it warns you if the
+numbers stop coming in.
+
+It is a helper, not a medical device. Keep the alarms on your phone or
+receiver turned on. Never dose insulin from this widget alone.
+
+
+COMING FROM THE OLD (BIG) VERSION?
+----------------------------------
+1. Right-click the old widget and pick Quit.
+2. Delete the old "Glucose Widget-win32-x64" folder.
+3. Set up this one below. Your theme, alert numbers, username and
+   widget spot are copied over by themselves. You only need to type
+   your Dexcom password again (the old version locked it in a way
+   only it could open).
+
+
+ONE-TIME SETUP (about 5 minutes)
+--------------------------------
+
+STEP 1 - On your iPhone: turn on Share
+   1. Open the Dexcom app (G6 or G7).
+   2. Tap "Share" (G6: the triangle-of-dots icon. G7: Connections > Share).
+   3. Turn Share on and invite at least one follower.
+      It can be a family member or your own second email address.
+      The widget only gets numbers if Share is on with a follower.
+   Note: Dexcom Stelo has no Share, so it cannot work with this widget.
+
+STEP 2 - On your PC: put the folder somewhere it can live forever
+   1. Move the whole "GlucoseWidget" folder to a permanent
+      spot, for example  C:\GlucoseWidget
+      (Do this BEFORE the first run. The widget starts itself with
+      Windows from wherever it was first run.)
+
+STEP 3 - Start it
+   1. Open the folder and double-click  "GlucoseWidget.exe"
+   2. If Windows shows a blue "Windows protected your PC" box:
+      click "More info", then "Run anyway". (It shows this for any
+      app that was not bought from a big company.)
+
+STEP 4 - Log in
+   1. A Settings window opens by itself the first time.
+   2. Type your Dexcom username and password. Use YOUR login, the one
+      on the phone that wears the sensor. Not a follower login.
+   3. Click "Test connection". You want to see the green
+      "It works! Latest reading: ..." message.
+   4. Click the three "Hear ... sound" buttons so you know what the
+      dings sound like, and set the volume.
+   5. Click "Save".
+
+That's it. The number shows up in the box within a few seconds.
+
+
+USING IT
+--------
+- Drag the box anywhere. It remembers where you put it.
+- Bell button    = snooze the dings for 30 minutes (click again to undo).
+- Gear button    = settings.
+- Dash button    = hide it. It tucks into the little icon near the clock
+                   (no taskbar icon). Click that icon to bring it back.
+                   It keeps watching and pops back up and dings if you
+                   go high or low. To use the normal taskbar instead,
+                   untick "Minimise to tray" in Settings.
+- Right-click the box (or the small icon near the clock) for the menu:
+  Always on top, Start with Windows, Quit.
+- The small icon near the clock also shows your number.
+
+Adding or removing looks
+------------------------
+Every look except Classic is one small file in the "themes" folder,
+inside the app folder. Want fewer looks? Delete that look's file.
+Want it back? Put the file back. Then open Settings and the list
+updates. (Classic is built in and can't be removed, so the widget
+always has something to show.)
+
+  reactor.js = Reactor timer     farm.js  = Farm sign
+  neon.js    = Night city HUD    og.js    = Green orb
+  glass.js   = Liquid glass
+
+Only put theme files here that came from Claude or that you trust,
+because they run inside the widget.
+
+The looks (pick in Settings > Look > Theme):
+- Classic        = dark box with a 3-hour graph.
+- Reactor timer  = blue box with digital-clock digits. The small timer
+                   counts down to your next reading (one comes every
+                   5 minutes). If it says LATE, the reading did not come
+                   and the timer counts up instead. In this look the
+                   in-range number is white instead of green.
+- Farm sign      = wooden sign on a starry sky, pixel-art style.
+                   The sky turns sunset for high and red for low.
+- Night city HUD = dark red screen with a menu list. The one you are in
+                   gets the cyan box. Blue in range, yellow high, red low.
+- Green orb      = glowing orb on a dark green dashboard. The glowing
+                   tube along the bottom is your last 3 hours, with
+                   light flowing along it. The two dotted lines are
+                   your high and low limits.
+- Liquid glass   = dark, shiny glass slab like the newest iPhone
+                   widgets. The glow inside turns green, orange, red
+                   or gray with your number.
+
+Colors:  green = in range   orange = high   red = low
+         gray  = the number is old (no new data)
+
+What the dings mean:
+- Fast triple beeps  = LOW  (repeats every 5 min until you are back up)
+- Ding-dong          = HIGH (repeats every 15 min)
+- Two soft beeps     = no new data for 20 minutes, or a login problem
+
+
+IF SOMETHING IS WRONG
+---------------------
+"No new data" / gray number
+   Your phone is what sends numbers to Dexcom. Check that the phone has
+   internet, Bluetooth is on, and the Dexcom app is open in the
+   background. The widget catches up by itself.
+
+"No connection, retrying"
+   Your PC cannot reach Dexcom right now. It keeps retrying by itself.
+
+"Login problem: open Settings"
+   The username or password was not accepted. Fix it in Settings.
+   The widget stops trying on purpose, because too many wrong tries
+   can lock your Dexcom account for a while.
+
+No sound
+   Check the PC volume and speakers. Windows "Do not disturb" hides the
+   pop-up banner, but the widget's own ding still plays.
+
+Still stuck
+   Right-click the box > "Open log file" and send that file to Claude.
+   (Your password is never written in it.)
+
+
+GOOD TO KNOW
+------------
+- Dexcom makes one new number every 5 minutes. The widget checks right
+  after each one is due, so it is usually under a minute behind your phone.
+- Your password is saved only on this PC, scrambled by Windows.
+- If the PC is asleep or off, the widget cannot ding.
+- If you ever move the folder, right-click > untick and re-tick
+  "Start with Windows".

@@ -1,0 +1,60 @@
+name: Build Windows app
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the app
+        run: dotnet build src/GlucoseWidget/GlucoseWidget.csproj -c Release -o out/GlucoseWidget
+
+      - name: Run the checks
+        run: |
+          dotnet build tests/GlucoseWidget.Tests/GlucoseWidget.Tests.csproj -c Release -o out/tests
+          ./out/tests/GlucoseWidget.Tests.exe
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+      - name: Put the download together
+        shell: pwsh
+        run: |
+          $v = (Get-Content VERSION -Raw).Trim()
+          $app = "out/GlucoseWidget"
+          Copy-Item ui "$app/ui" -Recurse
+          Copy-Item themes "$app/themes" -Recurse
+          (Get-Content 'START HERE.txt' -Raw) -replace "`r?`n", "`r`n" | Set-Content -NoNewline -Encoding utf8 "$app/START HERE.txt"
+          Get-ChildItem $app -Recurse -Include *.pdb,*.xml | Remove-Item -Force
+          # only the 64-bit loader is needed
+          if (Test-Path "$app/runtimes") {
+            Get-ChildItem "$app/runtimes" -Directory | Where-Object { $_.Name -ne 'win-x64' } | Remove-Item -Recurse -Force
+          }
+          New-Item -ItemType Directory dist -Force | Out-Null
+          Compress-Archive -Path $app -DestinationPath "dist/GlucoseWidget-v$v.zip" -CompressionLevel Optimal
+          Get-ChildItem $app -Recurse | Select-Object FullName, Length | Format-Table -AutoSize | Out-String -Width 200
+          "VERSION=$v" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GlucoseWidget-v${{ env.VERSION }}
+          path: dist/*.zip
+
+      - name: Publish as a release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "v$env:VERSION"
+          gh release view $tag 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            gh release upload $tag "dist/GlucoseWidget-v$env:VERSION.zip" --clobber
+          } else {
+            gh release create $tag "dist/GlucoseWidget-v$env:VERSION.zip" --title "Glucose Widget $tag" --notes "Unzip, then double-click GlucoseWidget.exe. See START HERE.txt inside."
+          }

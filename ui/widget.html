@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://themes.glucose; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
+<title>Glucose Widget</title>
+<style>
+  :root { --c: #8a93a3; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: transparent; overflow: hidden; user-select: none;
+    font-family: "Segoe UI", system-ui, sans-serif; color: #e8ecf2; }
+  #card { position: absolute; inset: 4px; border-radius: 14px; background: #141922;
+    border: 2px solid var(--c); padding: 8px 12px 8px; -webkit-app-region: drag;
+    display: flex; flex-direction: column; }
+  .ok { --c: #3ddc84; } .high { --c: #ffb020; } .low { --c: #ff4d4f; } .stale, .none { --c: #8a93a3; }
+  #card.alarm { animation: pulse 0.8s ease-in-out 30; }
+  @keyframes pulse { 50% { background: color-mix(in srgb, var(--c) 35%, var(--bg, #141922)); } }
+  #top { display: flex; align-items: center; justify-content: space-between; height: 20px; }
+  #status { font-size: 11px; color: #9aa4b5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #status.bad { color: #ff9a9c; }
+  .btns { display: flex; gap: 2px; -webkit-app-region: no-drag; flex: none; }
+  button { width: 22px; height: 20px; border: 0; border-radius: 5px; background: transparent;
+    color: #9aa4b5; font-size: 13px; line-height: 1; cursor: pointer; }
+  button:hover { background: #263042; color: #fff; }
+  button.on { color: #ffb020; }
+  #main { display: flex; align-items: center; gap: 8px; height: 62px; }
+  #value { font-size: 54px; font-weight: 700; line-height: 1; color: var(--c); letter-spacing: -1px; }
+  #value.word { font-size: 40px; }
+  #arrow { width: 36px; height: 36px; color: var(--c); flex: none; }
+  #side { order: 2; margin-left: auto; text-align: right; font-size: 11px; color: #9aa4b5; line-height: 1.5; }
+  #delta { font-size: 14px; color: #e8ecf2; font-weight: 600; }
+  canvas { width: 100%; height: 40px; display: block; }
+  #spark { flex: 1; min-height: 40px; }
+  #foot { font-size: 11px; color: #9aa4b5; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #segs, .ronly { display: none; }
+
+
+  /* ---- Windows app: every look fills the whole window; Windows 11 rounds the corners ---- */
+  html.native #card { inset: 0 !important; border-radius: 0 !important; }
+  html.native #lg { inset: 0 !important; border-radius: 0 !important; }
+  html.native #ogx, html.native #cp { border-radius: 0 !important; }
+  html.native, html.native body { background: #141922; }
+</style>
+</head>
+<body>
+<div id="card" class="none">
+  <div id="top">
+    <span id="status">Starting…</span>
+    <span class="btns">
+      <button id="snooze" title="Snooze alerts">&#128276;</button>
+      <button id="gear" title="Settings">&#9881;</button>
+      <button id="min" title="Minimise">&#8211;</button>
+    </span>
+  </div>
+  <div id="main">
+    <span id="value">---</span>
+    <svg style="order:1" id="arrow" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"></svg>
+    <div id="segs"></div>
+    <div id="side"><div id="delta"></div><div>mg/dL</div><div id="tl" class="ronly"></div><div id="timer" class="ronly"></div></div>
+  </div>
+  <canvas id="spark"></canvas>
+  <div id="foot">&nbsp;</div>
+</div>
+<script src="bridge.js"></script>
+<script src="sounds.js"></script>
+<script src="widget.js"></script>
+</body>
+</html>
