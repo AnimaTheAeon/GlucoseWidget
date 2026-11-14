@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'">
+<title>Glucose Widget Settings</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 18px 22px; background: #141922; color: #e8ecf2; font: 14px "Segoe UI", system-ui, sans-serif; }
+  h2 { font-size: 15px; margin: 18px 0 8px; color: #3ddc84; }
+  h2:first-child { margin-top: 0; }
+  label { display: block; margin: 8px 0 3px; color: #b8c1d1; }
+  input, select { width: 100%; padding: 7px 9px; border-radius: 7px; border: 1px solid #36425a; background: #0e1219; color: #fff; font: inherit; }
+  input[type=range] { padding: 0; }
+  .row { display: flex; gap: 12px; } .row > div { flex: 1; }
+  .hint { font-size: 12px; color: #8a93a3; margin-top: 3px; }
+  .bar { display: flex; gap: 8px; margin-top: 18px; }
+  button { padding: 8px 14px; border-radius: 7px; border: 1px solid #36425a; background: #1e2636; color: #fff; font: inherit; cursor: pointer; }
+  button:hover { background: #2a3550; }
+  button.primary { background: #2e9e63; border-color: #2e9e63; margin-left: auto; }
+  button.small { padding: 4px 10px; font-size: 12px; }
+  #result { margin-top: 10px; min-height: 20px; font-size: 13px; }
+  .good { color: #3ddc84; } .bad { color: #ff9a9c; }
+</style>
+</head>
+<body>
+  <h2>Where to get your numbers</h2>
+  <label for="source">Source</label>
+  <select id="source">
+    <option value="share">Dexcom (recommended)</option>
+    <option value="nightscout">My own Nightscout site</option>
+  </select>
+
+  <div id="shareBox">
+    <label for="username">Dexcom username</label>
+    <input id="username" autocomplete="off" spellcheck="false">
+    <div class="hint">The same login you use in the Dexcom app on your phone (not a follower's login).</div>
+    <label for="password">Dexcom password</label>
+    <input id="password" type="password" autocomplete="off">
+    <div class="hint" id="pwHint"></div>
+    <label for="region">Where you live</label>
+    <select id="region">
+      <option value="us">United States</option>
+      <option value="ous">Outside the United States</option>
+      <option value="jp">Japan</option>
+    </select>
+  </div>
+
+  <div id="nsBox" hidden>
+    <label for="nsUrl">Nightscout address</label>
+    <input id="nsUrl" placeholder="https://my-nightscout.example.com" spellcheck="false">
+    <label for="nsSecret">API secret (leave empty if the site is open)</label>
+    <input id="nsSecret" type="password" autocomplete="off">
+  </div>
+
+  <button id="test" style="margin-top:12px">Test connection</button>
+  <div id="result"></div>
+
+  <h2>Look</h2>
+  <label for="theme">Theme</label>
+  <select id="theme"></select>
+  <div class="hint">Themes are the files in the "themes" folder next to the app. Delete a file to remove a theme.</div>
+  <label style="display:flex;align-items:center;gap:8px;margin-top:12px;cursor:pointer">
+    <input id="minToTray" type="checkbox" style="width:auto"> Minimise to the tray (no taskbar icon)
+  </label>
+  <div class="hint">The dash button hides the widget next to the clock. Click the little icon there to bring it back. Alerts still pop it up.</div>
+
+  <h2>Alerts</h2>
+  <div class="row">
+    <div><label for="low">Ding when below</label><input id="low" type="number" min="40" max="120"></div>
+    <div><label for="high">Ding when above</label><input id="high" type="number" min="120" max="400"></div>
+  </div>
+  <div class="row">
+    <div><label for="repeatLow">Repeat low every (min)</label><input id="repeatLow" type="number" min="1" max="120"></div>
+    <div><label for="repeatHigh">Repeat high every (min)</label><input id="repeatHigh" type="number" min="1" max="240"></div>
+  </div>
+  <div class="row">
+    <div><label for="staleMin">Warn if no data for (min)</label><input id="staleMin" type="number" min="11" max="120"></div>
+    <div><label for="snoozeMin">Snooze button lasts (min)</label><input id="snoozeMin" type="number" min="5" max="240"></div>
+  </div>
+  <label for="volume">Volume</label>
+  <input id="volume" type="range" min="0" max="1" step="0.05">
+  <div style="margin-top:8px">
+    <button class="small" data-sound="low">Hear LOW sound</button>
+    <button class="small" data-sound="high">Hear HIGH sound</button>
+    <button class="small" data-sound="stale">Hear "no data" sound</button>
+  </div>
+
+  <div class="bar">
+    <button id="cancel">Cancel</button>
+    <button id="save" class="primary">Save</button>
+  </div>
+<script src="bridge.js"></script>
+<script src="sounds.js"></script>
+<script src="settings.js"></script>
+</body>
+</html>
