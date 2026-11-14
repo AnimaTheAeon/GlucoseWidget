@@ -167,7 +167,7 @@ static class Tests
         Check(d != null, "themes folder exists");
         var list = Themes.List(System.IO.Path.Combine(d.FullName, "themes"));
         Console.WriteLine("  themes: " + string.Join(", ", list.Select(t => t.id)));
-        Check(list[0].id == "classic" && list.Count >= 2, "theme files found");
+        Check(list[0].id == "Classic" && list.Count >= 2 && list.Any(t => t.id == "Liquid Glass" && t.key == "glass"), "theme files found");
         Ok("theme files are listed");
     }
 

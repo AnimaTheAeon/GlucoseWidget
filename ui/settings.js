@@ -44,7 +44,7 @@ loadAll();
 if (window.api.on) window.api.on('refresh', loadAll);
 
 $('source').onchange = showSource;
-function showGlass() { $('glassBox').style.opacity = $('theme').value === 'glass' ? '1' : '.45'; }
+function showGlass() { $('glassBox').style.opacity = $('theme').value === 'Liquid Glass' ? '1' : '.45'; }
 $('theme').onchange = showGlass;
 
 $('test').onclick = async () => {

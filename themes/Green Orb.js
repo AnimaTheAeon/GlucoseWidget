@@ -1,5 +1,5 @@
-// @theme {"id": "og", "name": "Green orb", "width": 300, "height": 180}
-// Glucose Widget theme: "Green orb". Delete this file to remove the theme; put it back to restore it.
+// @theme {"id": "og", "name": "Green Orb", "width": 300, "height": 180}
+// Glucose Widget theme: "Green Orb". Delete this file to remove the theme; put it back to restore it.
 (function () {
   // Green orb theme: the glowing tube along the bottom is the real 3-hour glucose line.
   function drawOgGraph(s) {

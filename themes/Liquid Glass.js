@@ -1,5 +1,5 @@
-// @theme {"id": "glass", "name": "Liquid glass (dark)", "width": 300, "height": 180}
-// Glucose Widget theme: "Liquid glass (dark)". Delete this file to remove the theme; put it back to restore it.
+// @theme {"id": "glass", "name": "Liquid Glass", "width": 300, "height": 180}
+// Glucose Widget theme: "Liquid Glass". Delete this file to remove the theme; put it back to restore it.
 (function () {
   // Liquid glass theme: smooth white line with a soft fill.
   function drawLgChart(s) {

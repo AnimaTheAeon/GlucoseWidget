@@ -29,7 +29,7 @@ namespace GlucoseWidget
         public bool minToTray { get; set; } = true;
         public bool glassClear { get; set; } = true;
         public double glassAmount { get; set; } = 0.5;
-        public string theme { get; set; } = "classic";
+        public string theme { get; set; } = "Classic";
         public int? posX { get; set; }
         public int? posY { get; set; }
 
