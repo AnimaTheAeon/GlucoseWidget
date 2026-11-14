@@ -83,6 +83,10 @@ namespace GlucoseWidget
             widget = new WidgetForm(this);
             widget.Show();
             heartbeat.Start();
+            // Get the Settings window ready in the background so it opens instantly later.
+            var warm = new Timer { Interval = 2500 };
+            warm.Tick += (s, e) => { warm.Stop(); warm.Dispose(); EnsureSettingsForm(); };
+            warm.Start();
             if (IsConfigured()) Schedule(500);
             else { status = "setup"; message = "Open Settings to log in"; OpenSettings(); }
         }
@@ -262,13 +266,18 @@ namespace GlucoseWidget
             widget.Show();
         }
 
-        public void OpenSettings()
+        SettingsForm EnsureSettingsForm()
         {
-            if (settingsForm != null && !settingsForm.IsDisposed) { settingsForm.Show(); settingsForm.Activate(); return; }
-            settingsForm = new SettingsForm(this);
-            settingsForm.FormClosed += (s, e) => settingsForm = null;
-            settingsForm.Show();
+            if (settingsForm == null || settingsForm.IsDisposed)
+            {
+                settingsForm = new SettingsForm(this);
+                settingsForm.FormClosed += (s, e) => settingsForm = null;
+                settingsForm.Warm();
+            }
+            return settingsForm;
         }
+
+        public void OpenSettings() => EnsureSettingsForm().Present();
 
         public void SavePosition(Point p)
         {
@@ -432,7 +441,7 @@ namespace GlucoseWidget
                     RestartPolling();
                     return true;
                 }
-                case "settings-close": settingsForm?.Close(); return null;
+                case "settings-close": settingsForm?.Hide(); return null;
             }
             return null;
         }
@@ -446,7 +455,7 @@ namespace GlucoseWidget
             tray.Visible = false;
             tray.Dispose();
             widget?.ForceClose();
-            settingsForm?.Close();
+            settingsForm?.ForceClose();
             ExitThread();
         }
     }

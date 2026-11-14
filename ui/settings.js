@@ -19,7 +19,9 @@ function say(text, good) {
   $('result').className = good ? 'good' : 'bad';
 }
 
-window.api.loadSettings().then((s) => {
+function loadAll() {
+  $('password').value = ''; $('nsSecret').value = ''; $('result').textContent = '';
+  return window.api.loadSettings().then((s) => {
   $('theme').innerHTML = '';
   for (const t of s.themes || []) {
     const o = document.createElement('option');
@@ -33,7 +35,10 @@ window.api.loadSettings().then((s) => {
     ? 'A password is already saved. Leave this empty to keep it.'
     : (s.canEncrypt ? 'Saved on this PC only, scrambled by Windows.' : 'This PC cannot store it safely, so you will be asked again after a restart.');
   if (s.hasNsSecret) $('nsSecret').placeholder = '(saved)';
-});
+  });
+}
+loadAll();
+if (window.api.on) window.api.on('refresh', loadAll);
 
 $('source').onchange = showSource;
 
