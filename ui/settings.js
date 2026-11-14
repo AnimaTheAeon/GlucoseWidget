@@ -1,10 +1,11 @@
 const $ = (id) => document.getElementById(id);
-const FIELDS = ['theme', 'source','username', 'region', 'nsUrl', 'low', 'high', 'repeatLow', 'repeatHigh', 'staleMin', 'snoozeMin', 'volume'];
+const FIELDS = ['theme', 'source','username', 'region', 'nsUrl', 'low', 'high', 'repeatLow', 'repeatHigh', 'staleMin', 'snoozeMin', 'volume', 'glassAmount'];
 
 function form() {
   const f = { password: $('password').value, nsSecret: $('nsSecret').value };
   for (const k of FIELDS) f[k] = $(k).value;
   f.minToTray = $('minToTray').checked;
+  f.glassClear = $('glassClear').checked;
   return f;
 }
 
@@ -30,6 +31,8 @@ function loadAll() {
   }
   for (const k of FIELDS) $(k).value = s[k];
   $('minToTray').checked = Boolean(s.minToTray);
+  $('glassClear').checked = Boolean(s.glassClear);
+  showGlass();
   showSource();
   $('pwHint').textContent = s.hasPassword
     ? 'A password is already saved. Leave this empty to keep it.'
@@ -41,6 +44,8 @@ loadAll();
 if (window.api.on) window.api.on('refresh', loadAll);
 
 $('source').onchange = showSource;
+function showGlass() { $('glassBox').style.opacity = $('theme').value === 'glass' ? '1' : '.45'; }
+$('theme').onchange = showGlass;
 
 $('test').onclick = async () => {
   say('Checking…', true);

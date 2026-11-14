@@ -72,6 +72,37 @@ namespace GlucoseWidget
         [DllImport("user32.dll")] public static extern bool ReleaseCapture();
         [DllImport("user32.dll")] public static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
         [DllImport("dwmapi.dll")] public static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int value, int size);
+        [DllImport("dwmapi.dll")] static extern int DwmExtendFrameIntoClientArea(IntPtr hwnd, ref Margins m);
+        [DllImport("user32.dll")] static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref CompositionData data);
+
+        [StructLayout(LayoutKind.Sequential)] struct Margins { public int L, R, T, B; }
+        [StructLayout(LayoutKind.Sequential)] struct AccentPolicy { public int State, Flags, Color, Animation; }
+        [StructLayout(LayoutKind.Sequential)] struct CompositionData { public int Attribute; public IntPtr Data; public int Size; }
+
+        // See-through glass: Windows blurs whatever is behind the window (the same effect as the
+        // Start menu). This works even when the widget is not the focused window.
+        public static void Blur(IntPtr hwnd, bool on)
+        {
+            try
+            {
+                var m = on ? new Margins { L = -1, R = -1, T = -1, B = -1 } : new Margins();
+                DwmExtendFrameIntoClientArea(hwnd, ref m);
+                var dark = 1;
+                DwmSetWindowAttribute(hwnd, 20, ref dark, 4); // dark mode
+                // 4 = acrylic blur; colour is AABBGGRR, a light dark tint
+                var accent = new AccentPolicy { State = on ? 4 : 0, Flags = on ? 2 : 0, Color = on ? 0x22100E0C : 0 };
+                var size = Marshal.SizeOf(accent);
+                var ptr = Marshal.AllocHGlobal(size);
+                try
+                {
+                    Marshal.StructureToPtr(accent, ptr, false);
+                    var data = new CompositionData { Attribute = 19 /* WCA_ACCENT_POLICY */, Data = ptr, Size = size };
+                    SetWindowCompositionAttribute(hwnd, ref data);
+                }
+                finally { Marshal.FreeHGlobal(ptr); }
+            }
+            catch (Exception e) { Log.Write("blur failed", e.Message); }
+        }
 
         // Windows 11: smooth rounded corners and no extra 1px border on the borderless widget.
         public static void Round(IntPtr hwnd)
@@ -111,7 +142,7 @@ namespace GlucoseWidget
             Controls.Add(web);
             ClientSize = new Size(W, H);
 
-            HandleCreated += (s, e) => { Native.Round(Handle); ApplySize(); Place(); };
+            HandleCreated += (s, e) => { Native.Round(Handle); ApplySize(); Place(); ApplyGlass(); };
             Load += async (s, e) =>
             {
                 try { await WebHost.Attach(app, this, web, "widget.html"); ready = true; }
@@ -148,6 +179,18 @@ namespace GlucoseWidget
         {
             if (!ready || web.CoreWebView2 == null) return;
             WebHost.Post(web.CoreWebView2, new Dictionary<string, object> { { "type", "event" }, { "name", name }, { "data", data } });
+        }
+
+        // Turns the see-through glass on or off to match the settings.
+        public void ApplyGlass()
+        {
+            if (!IsHandleCreated) return;
+            var on = app.SeeThrough;
+            var solid = Color.FromArgb(20, 25, 34);
+            BackColor = on ? Color.Black : solid; // black = "let the blur show" for Windows
+            web.DefaultBackgroundColor = on ? Color.Transparent : solid;
+            Native.Blur(Handle, on);
+            Invalidate();
         }
 
         public void BeginDrag()

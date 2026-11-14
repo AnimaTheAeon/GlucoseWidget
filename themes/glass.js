@@ -56,11 +56,14 @@
       radial-gradient(ellipse at 12% -10%, color-mix(in srgb, var(--lc) 34%, transparent), transparent 58%),
       radial-gradient(ellipse at 105% 110%, color-mix(in srgb, var(--lc) 22%, transparent), transparent 55%),
       radial-gradient(ellipse at 60% 40%, rgba(120,130,170,.10), transparent 70%),
-      linear-gradient(160deg, rgba(38,40,48,.94), rgba(16,17,22,.95));
+      linear-gradient(160deg, rgba(38,40,48,calc(.94 * var(--ga, 1))), rgba(16,17,22,calc(.95 * var(--ga, 1))));
     box-shadow: inset 0 1.5px 0 rgba(255,255,255,.42), inset 0 -1px 0 rgba(255,255,255,.10), inset 1px 0 0 rgba(255,255,255,.16),
       inset -1px 0 0 rgba(255,255,255,.08), inset 0 0 24px rgba(255,255,255,.05), 0 0 0 .5px rgba(0,0,0,.6), 0 3px 6px rgba(0,0,0,.35); }
   #lg::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
     background: linear-gradient(170deg, rgba(255,255,255,.13), transparent 32%); }
+  /* see-through mode: Windows blurs the desktop behind the window; the page lets it show */
+  html.seethrough, html.seethrough body { background: transparent !important; }
+  html.seethrough #lg { text-shadow: 0 1px 2px rgba(0,0,0,.35); }
   #lg.ok { --lc: #30d158; } #lg.high { --lc: #ff9f0a; } #lg.low { --lc: #ff453a; } #lg.stale { --lc: #8e8e93; }
   #lg .top { position: relative; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
   #lg .top .ago { font-weight: 500; color: rgba(255,255,255,.55); font-size: 11px; }

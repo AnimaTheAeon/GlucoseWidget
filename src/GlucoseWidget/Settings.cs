@@ -27,6 +27,8 @@ namespace GlucoseWidget
         public bool alwaysOnTop { get; set; } = true;
         public bool autoStart { get; set; } = true;
         public bool minToTray { get; set; } = true;
+        public bool glassClear { get; set; } = true;
+        public double glassAmount { get; set; } = 0.5;
         public string theme { get; set; } = "classic";
         public int? posX { get; set; }
         public int? posY { get; set; }

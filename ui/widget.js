@@ -97,6 +97,9 @@ function render() {
   const s = state; const r = s.reading; const now = Date.now();
   const theme = activeTheme(s.settings.theme);
   document.body.className = theme;
+  const clear = theme === 'glass' && document.documentElement.classList.contains('native') && Boolean(s.settings.glassClear);
+  document.documentElement.classList.toggle('seethrough', clear);
+  document.documentElement.style.setProperty('--ga', clear ? String(Math.max(0.08, 1 - Number(s.settings.glassAmount || 0) * 0.92)) : '1');
   const zone = COLORS[s.zone] ? s.zone : 'none';
   $('card').classList.remove('ok', 'high', 'low', 'stale', 'none');
   $('card').classList.add(zone);
