@@ -65,7 +65,7 @@
   html.seethrough, html.seethrough body { background: transparent !important; }
   /* see-through stays dark mode: a dark smoky tint always sits under the glass, even on a bright desktop */
   html.seethrough #lg { text-shadow: 0 1px 3px rgba(0,0,0,.55); }
-  html.seethrough #lg #lgVal { background: linear-gradient(180deg, #ffffff 0%, #ffffff 50%, rgba(255,255,255,.9)); -webkit-background-clip: text; }
+  #lg #lgVal { text-shadow: none !important; } /* a shadow would paint over the gradient digits and grey them */
   html.seethrough #lg::before { background: linear-gradient(170deg, rgba(255,255,255,.10), transparent 32%); }
   #lg.ok { --lc: #30d158; } #lg.high { --lc: #ff9f0a; } #lg.low { --lc: #ff453a; } #lg.stale { --lc: #8e8e93; }
   #lg .top { position: relative; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
@@ -73,7 +73,7 @@
   #lg .top .ago.bad { color: #ffd27a; }
   #lg .row { position: relative; display: flex; align-items: flex-end; gap: 8px; margin-top: 3px; }
   #lg #lgVal { font-size: 58px; font-weight: 700; line-height: .95; letter-spacing: -2px;
-    background: linear-gradient(180deg, #ffffff 0%, rgba(255,255,255,.86) 55%, rgba(255,255,255,.6)); -webkit-background-clip: text; color: transparent;
+    background: linear-gradient(180deg, #ffffff 0%, #dededf 55%, #a7a8ac); -webkit-background-clip: text; color: transparent; /* solid, so nothing shows through the digits */
     filter: drop-shadow(0 1px 0 rgba(255,255,255,.35)) drop-shadow(0 2px 8px rgba(0,0,0,.4)); }
   #lg #lgVal.word { font-size: 40px; }
   #lg .side { margin-bottom: 6px; font-size: 11px; line-height: 1.3; color: rgba(255,255,255,.65); }
