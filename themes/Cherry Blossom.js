@@ -118,6 +118,64 @@
     requestAnimationFrame(frame);
   }
 
+  // ---------- the grove behind (painted once, softly out of focus) ----------
+  function paintScene() {
+    const c = $('skScene');
+    const g = setup(c);
+    let k = 21;
+    const rnd = (a, b) => { k = (k * 9301 + 49297) % 233280; return a + (k / 233280) * (b - a); };
+    const HZ = 112; // horizon
+    // sky
+    let gr = g.createLinearGradient(0, 0, 0, HZ);
+    gr.addColorStop(0, '#fff3f6'); gr.addColorStop(1, '#fbe2ea');
+    g.fillStyle = gr; g.fillRect(0, 0, W, HZ + 2);
+    // ground: fresh grass near the horizon, a carpet of fallen petals nearer
+    gr = g.createLinearGradient(0, HZ, 0, H);
+    gr.addColorStop(0, '#d6dcc4'); gr.addColorStop(0.25, '#e6c7d2'); gr.addColorStop(1, '#e2a9c0');
+    g.fillStyle = gr; g.fillRect(0, HZ, W, H - HZ);
+    // a lighter path down the middle of the avenue
+    g.fillStyle = 'rgba(255,240,245,.55)';
+    g.beginPath(); g.moveTo(140, HZ); g.lineTo(160, HZ); g.lineTo(250, H); g.lineTo(50, H); g.closePath(); g.fill();
+    // fallen petals on the ground
+    for (let i = 0; i < 260; i++) {
+      const y = rnd(HZ + 2, H); const near = (y - HZ) / (H - HZ);
+      g.fillStyle = `rgba(${Math.round(rnd(220, 245))},${Math.round(rnd(110, 160))},${Math.round(rnd(160, 195))},${(0.25 + near * 0.35).toFixed(2)})`;
+      g.beginPath(); g.ellipse(rnd(0, W), y, 0.6 + near * 1.6, 0.4 + near * 0.8, rnd(0, 3), 0, 6.28); g.fill();
+    }
+    function tree(x, base, scale, pale) {
+      // dappled shade under the crown
+      g.fillStyle = `rgba(150,60,110,${(0.16 * (1 - pale)).toFixed(2)})`;
+      g.beginPath(); g.ellipse(x, base + 1, 26 * scale, 4 * scale, 0, 0, 6.28); g.fill();
+      // trunk and a few limbs
+      const trunk = pale > 0.5 ? `rgba(110,90,96,${(1 - pale).toFixed(2)})` : '#3d2b2f';
+      g.strokeStyle = trunk; g.lineCap = 'round';
+      g.lineWidth = 3.2 * scale;
+      const top = base - 30 * scale;
+      g.beginPath(); g.moveTo(x, base); g.quadraticCurveTo(x - 3 * scale, base - 15 * scale, x + rnd(-2, 2) * scale, top); g.stroke();
+      g.lineWidth = 1.6 * scale;
+      for (const d of [-1, 1, -0.5, 0.6]) {
+        g.beginPath(); g.moveTo(x, top + 6 * scale);
+        g.quadraticCurveTo(x + d * 10 * scale, top - 2 * scale, x + d * 20 * scale, top - rnd(6, 14) * scale); g.stroke();
+      }
+      // the crown: many overlapping blossom clumps, deeper pink underneath, lighter on top
+      const n = Math.round(26 + 30 * scale);
+      for (let i = 0; i < n; i++) {
+        const a = rnd(0, 6.28); const rr = Math.sqrt(rnd(0, 1));
+        const cx = x + Math.cos(a) * rr * 30 * scale; const cy = top - 8 * scale + Math.sin(a) * rr * 17 * scale;
+        const lift = (top - cy) / (20 * scale);
+        const r = Math.round(228 + lift * 14 + rnd(-6, 6)); const gg = Math.round(100 + lift * 45 + rnd(-15, 15)); const b = Math.round(172 + lift * 22 + rnd(-10, 10));
+        g.fillStyle = `rgba(${r},${gg},${b},${(0.78 - pale * 0.3).toFixed(2)})`;
+        g.beginPath(); g.arc(cx, cy, rnd(4.5, 8.5) * scale, 0, 6.28); g.fill();
+      }
+    }
+    // far rows fade into pink haze; nearer trees stand at the edges, leaving the middle calm
+    for (let x = -6; x < W + 10; x += rnd(13, 19)) tree(x, HZ + rnd(1, 4), rnd(0.3, 0.4), 0.6);
+    for (const [x, b, sc] of [[36, HZ + 14, 0.7], [96, HZ + 7, 0.48], [206, HZ + 7, 0.5], [262, HZ + 14, 0.72]]) tree(x, b, sc, 0.3);
+    for (const [x, b, sc] of [[-10, H - 4, 1.45], [314, H - 2, 1.5]]) tree(x, b, sc, 0.05);
+    // a pale wash so everything sits back
+    g.fillStyle = 'rgba(255,240,245,.1)'; g.fillRect(0, 0, W, H);
+  }
+
   // ---------- the branch ----------
   // Built from smooth curves that taper from thick to thin, with light on top, shade underneath,
   // the horizontal bark marks (lenticels) cherry trees have, and blossoms in clusters on short stems.
@@ -249,7 +307,12 @@
   #sk { position: absolute; inset: 0; overflow: hidden; font-family: "Segoe UI Variable Display", "Segoe UI", "Yu Gothic UI", sans-serif; color: #4a2a38;
     background: radial-gradient(ellipse at 15% 0%, #fff4f6 0%, transparent 55%), linear-gradient(180deg, #fde8ee 0%, #f9dbe4 45%, #f2d4dc 100%); }
   #sk.ok { --zc: #5f2a44; --zt: #2f8a5a; } #sk.high { --zc: #a3570f; --zt: #c26a10; } #sk.low { --zc: #b3122e; --zt: #c8102e; } #sk.stale { --zc: #8a7a80; --zt: #8a7a80; }
-  #sk .haze { position: absolute; inset: 0; background: radial-gradient(ellipse at 90% 110%, rgba(255,255,255,.7), transparent 50%); }
+  #sk canvas.scene { filter: blur(1.1px); }
+  /* soft light behind the number and the details so the grove never fights the reading */
+  #sk .haze { position: absolute; inset: 0;
+    background: radial-gradient(ellipse 110px 62px at 70px 108px, rgba(255,246,249,.6), transparent 70%),
+      radial-gradient(ellipse 96px 62px at 232px 112px, rgba(255,246,249,.5), transparent 70%),
+      linear-gradient(180deg, rgba(255,244,247,.25), rgba(255,244,247,0) 40%); }
   #sk canvas { position: absolute; inset: 0; width: 300px; height: 180px; }
   #sk canvas.back { filter: blur(1.1px); opacity: .75; }
   #sk svg.branch { position: absolute; left: 0; top: 0; width: 200px; height: 92px; }
@@ -279,6 +342,7 @@
 `,
     html: String.raw`
   <div id="sk" class="stale">
+    <canvas class="scene" id="skScene"></canvas>
     <div class="haze"></div>
     <canvas class="back" id="skBack"></canvas>
     <svg class="branch" id="skBranch" viewBox="0 0 200 92"></svg>
@@ -294,6 +358,7 @@
   </div>
 `,
     init() {
+      paintScene();
       $('skBranch').innerHTML = branch();
       $('skFlower').innerHTML = flower(12, 12, 10.5, 0, 1).split('url(#skPet)').join('currentColor').split('url(#skEye)').join('#fff');
       start();
