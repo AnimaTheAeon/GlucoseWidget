@@ -18,9 +18,9 @@
       y: anywhere ? rand(-20, H) : rand(-40, -10),
       size: near ? rand(5.5, 8.5) : rand(3, 5),
       fall: near ? rand(16, 26) : rand(9, 15),          // px per second, steady sink rate
-      swayAmp: rand(8, 22), swayFreq: rand(0.35, 0.8), swayPhase: rand(0, 6.28),
-      flip: rand(0, 6.28), flipRate: rand(1.6, 4.2) * (Math.random() < 0.5 ? -1 : 1),   // tumbling end over end
-      spin: rand(0, 6.28), spinRate: rand(-1.2, 1.2),   // turning flat in the air
+      swayAmp: rand(8, 20), swayFreq: rand(0.28, 0.6), swayPhase: rand(0, 6.28),
+      flip: rand(0, 6.28), flipRate: rand(1.1, 3.0) * (Math.random() < 0.5 ? -1 : 1),   // tumbling end over end
+      spin: rand(0, 6.28), spinRate: rand(-0.8, 0.8),   // turning flat in the air
       tilt: rand(0.25, 0.9),                            // how much the tumble shows
       tint: rand(0, 1),
     };
@@ -101,46 +101,119 @@
     started = true;
     const gb = setup($('skBack')); const gf = setup($('skFront'));
     let last = performance.now();
-    const t0 = last;
+    let t = 0;
+    const draw = (dt) => {
+      t += dt;
+      gb.clearRect(0, 0, W, H); gf.clearRect(0, 0, W, H);
+      step(layers.back, gb, dt, t);
+      step(layers.front, gf, dt, t);
+    };
+    window.__sakuraStep = draw; // lets a recorder step time evenly
     function frame(now) {
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
-      const t = (now - t0) / 1000;
-      if (document.body.classList.contains('sakura')) {
-        gb.clearRect(0, 0, W, H); gf.clearRect(0, 0, W, H);
-        step(layers.back, gb, dt, t);
-        step(layers.front, gf, dt, t);
-      }
+      if (document.body.classList.contains('sakura') && !window.__sakuraManual) draw(dt);
       requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
   }
 
   // ---------- the branch ----------
-  function flower(x, y, r, rot, open) {
-    let s = `<g transform="translate(${x} ${y}) rotate(${rot})">`;
-    for (let i = 0; i < 5; i++) {
-      s += `<path transform="rotate(${i * 72})" d="M0,0 C${-r * 0.55},${-r * 0.35} ${-r * 0.5},${-r * 0.95} ${-r * 0.14},${-r} L0,${-r * 0.8} L${r * 0.14},${-r} C${r * 0.5},${-r * 0.95} ${r * 0.55},${-r * 0.35} 0,0 Z"
-        fill="url(#skPet)" stroke="rgba(214,120,150,.45)" stroke-width=".4" opacity="${open}"/>`;
+  // Built from smooth curves that taper from thick to thin, with light on top, shade underneath,
+  // the horizontal bark marks (lenticels) cherry trees have, and blossoms in clusters on short stems.
+  function curve(pts, n) {
+    const out = [];
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(0, i - 1)]; const p1 = pts[i]; const p2 = pts[i + 1]; const p3 = pts[Math.min(pts.length - 1, i + 2)];
+      for (let k = 0; k < n; k++) {
+        const t = k / n; const t2 = t * t; const t3 = t2 * t;
+        const f = (a0, a1, a2, a3) => 0.5 * ((2 * a1) + (-a0 + a2) * t + (2 * a0 - 5 * a1 + 4 * a2 - a3) * t2 + (-a0 + 3 * a1 - 3 * a2 + a3) * t3);
+        out.push([f(p0[0], p1[0], p2[0], p3[0]), f(p0[1], p1[1], p2[1], p3[1])]);
+      }
     }
-    s += `<circle r="${r * 0.22}" fill="#e2557c"/>`;
-    for (let i = 0; i < 7; i++) {
-      const a = (i / 7) * 6.28; const l = r * 0.45;
-      s += `<line x1="0" y1="0" x2="${(Math.cos(a) * l).toFixed(1)}" y2="${(Math.sin(a) * l).toFixed(1)}" stroke="#c9375f" stroke-width=".35"/><circle cx="${(Math.cos(a) * l).toFixed(1)}" cy="${(Math.sin(a) * l).toFixed(1)}" r=".55" fill="#f2c94c"/>`;
+    out.push(pts[pts.length - 1]);
+    return out;
+  }
+  function limb(pts, w0, w1, seed) {
+    const c = curve(pts, 10);
+    const L = []; const R = []; const top = []; const marks = [];
+    let rnd = seed;
+    const rand2 = () => { rnd = (rnd * 9301 + 49297) % 233280; return rnd / 233280; };
+    for (let i = 0; i < c.length; i++) {
+      const a = c[Math.max(0, i - 1)]; const b = c[Math.min(c.length - 1, i + 1)];
+      let tx = b[0] - a[0]; let ty = b[1] - a[1]; const len = Math.hypot(tx, ty) || 1; tx /= len; ty /= len;
+      const nx = -ty; const ny = tx;
+      const t = i / (c.length - 1);
+      const w = (w0 + (w1 - w0) * Math.pow(t, 0.8)) * (1 + (rand2() - 0.5) * 0.12);
+      L.push([c[i][0] + nx * w / 2, c[i][1] + ny * w / 2]);
+      R.push([c[i][0] - nx * w / 2, c[i][1] - ny * w / 2]);
+      top.push([c[i][0] - nx * w * 0.22, c[i][1] - ny * w * 0.22]);
+      if (w > 2.4 && rand2() < 0.42) marks.push([c[i][0] + nx * w * (rand2() - 0.5) * 0.5, c[i][1] + ny * w * (rand2() - 0.5) * 0.5, nx, ny, w * (0.5 + rand2() * 0.6)]);
+    }
+    const poly = (arr) => arr.map((p, i) => `${i ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`).join(' ');
+    let s = `<path d="${poly(L)} ${poly(R.slice().reverse()).replace('M', 'L')} Z" fill="url(#skBark)"/>`;
+    s += `<path d="${poly(top)}" fill="none" stroke="#8a6656" stroke-width="${Math.max(0.5, w0 * 0.22).toFixed(1)}" stroke-linecap="round" opacity=".45"/>`;
+    for (const [x, y, nx, ny, w] of marks) {
+      // lenticels: short pale bands running across the branch
+      const h = w * 0.16;
+      s += `<path d="M${(x + nx * h).toFixed(1)},${(y + ny * h).toFixed(1)} L${(x - nx * h).toFixed(1)},${(y - ny * h).toFixed(1)}" stroke="#b09486" stroke-width=".55" opacity=".5" stroke-linecap="round"/>`;
+    }
+    return { svg: s, at: (t) => c[Math.round(t * (c.length - 1))] };
+  }
+  function flower(x, y, r, rot, squash) {
+    let s = `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot}) scale(1 ${squash})">`;
+    for (let i = 0; i < 5; i++) {
+      const L = r * (0.92 + (i % 2) * 0.08);
+      s += `<path transform="rotate(${i * 72 + (i % 2) * 4})" d="M0,0 C${(-L * 0.62).toFixed(1)},${(-L * 0.3).toFixed(1)} ${(-L * 0.55).toFixed(1)},${(-L * 0.98).toFixed(1)} ${(-L * 0.15).toFixed(1)},${(-L).toFixed(1)} L0,${(-L * 0.82).toFixed(1)} L${(L * 0.15).toFixed(1)},${(-L).toFixed(1)} C${(L * 0.55).toFixed(1)},${(-L * 0.98).toFixed(1)} ${(L * 0.62).toFixed(1)},${(-L * 0.3).toFixed(1)} 0,0 Z"
+        fill="url(#skPet)" stroke="rgba(214,120,150,.35)" stroke-width=".35"/>`;
+    }
+    s += `<circle r="${(r * 0.3).toFixed(1)}" fill="url(#skEye)"/>`;
+    for (let i = 0; i < 11; i++) {
+      const a = (i / 11) * 6.283 + 0.2; const l = r * (0.42 + (i % 3) * 0.06);
+      const ex = (Math.cos(a) * l).toFixed(1); const ey = (Math.sin(a) * l).toFixed(1);
+      s += `<line x1="0" y1="0" x2="${ex}" y2="${ey}" stroke="#d65a80" stroke-width=".3"/><circle cx="${ex}" cy="${ey}" r=".55" fill="#f0c24a"/>`;
     }
     return s + '</g>';
   }
+  function bud(x, y, rot, s) {
+    return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot}) scale(${s})">
+      <path d="M0,0 C-2.6,-2.2 -2.4,-6.4 0,-8 C2.4,-6.4 2.6,-2.2 0,0 Z" fill="#f3829f" stroke="#c4527a" stroke-width=".35"/>
+      <path d="M0,0.4 C-1.8,-0.6 -2,-2.6 -1.2,-3.4 C-0.6,-2 0.6,-2 1.2,-3.4 C2,-2.6 1.8,-0.6 0,0.4 Z" fill="#7a3a2a"/></g>`;
+  }
+  function cluster(x, y, flowers, seed) {
+    // short stems radiating from one spur, each ending in a flower or a bud
+    let s = `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.6" fill="#4a2e26"/>`;
+    let k = seed;
+    const r2 = () => { k = (k * 9301 + 49297) % 233280; return k / 233280; };
+    for (let i = 0; i < flowers.length; i++) {
+      const ang = (-150 + (i / Math.max(1, flowers.length - 1)) * 120 + (r2() - 0.5) * 30) * Math.PI / 180;
+      const len = 6 + r2() * 6;
+      const fx = x + Math.cos(ang) * len; const fy = y + Math.sin(ang) * len + 4;
+      s += `<path d="M${x.toFixed(1)},${y.toFixed(1)} Q${((x + fx) / 2 + 2).toFixed(1)},${((y + fy) / 2 + 2).toFixed(1)} ${fx.toFixed(1)},${fy.toFixed(1)}" stroke="#6b8a3a" stroke-width=".7" fill="none"/>`;
+      s += flowers[i] === 'b' ? bud(fx, fy, ang * 57.3 + 90, 0.8 + r2() * 0.3) : flower(fx, fy, flowers[i], Math.round(r2() * 70), (0.72 + r2() * 0.28).toFixed(2));
+    }
+    return s;
+  }
   function branch() {
-    const fl = [[70, 22, 7, 10], [92, 12, 6, -20], [118, 30, 7.5, 30], [143, 22, 6.5, 5], [52, 38, 6, -35], [160, 44, 5.5, 50], [100, 46, 5, 12], [30, 18, 5.5, 20], [133, 56, 4.5, -10], [80, 60, 4, 40]];
-    const buds = [[176, 52], [64, 8], [150, 64], [110, 64]];
-    let s = `<defs><radialGradient id="skPet" cx="50%" cy="20%" r="80%"><stop offset="0" stop-color="#fffafb"/><stop offset=".6" stop-color="#ffd6e1"/><stop offset="1" stop-color="#f3a2ba"/></radialGradient></defs>`;
-    s += `<path d="M-6,4 C30,12 60,18 96,24 C120,28 150,36 186,56" stroke="#4a2c26" stroke-width="4.2" fill="none" stroke-linecap="round"/>
-      <path d="M58,19 C66,34 74,48 84,62" stroke="#4a2c26" stroke-width="2.4" fill="none" stroke-linecap="round"/>
-      <path d="M110,27 C114,40 122,52 136,60" stroke="#4a2c26" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <path d="M86,22 C90,14 92,8 96,2" stroke="#4a2c26" stroke-width="1.6" fill="none" stroke-linecap="round"/>
-      <path d="M-6,4 C30,12 60,18 96,24 C120,28 150,36 186,56" stroke="rgba(255,255,255,.18)" stroke-width="1" fill="none" transform="translate(0,-1.2)"/>`;
-    for (const [x, y] of buds) s += `<ellipse cx="${x}" cy="${y}" rx="2.4" ry="3.6" fill="#f07a9a" stroke="#b84a6a" stroke-width=".4"/>`;
-    for (const [x, y, r, rot] of fl) s += flower(x, y, r, rot, 1);
+    let s = `<defs>
+      <radialGradient id="skPet" cx="50%" cy="85%" r="95%"><stop offset="0" stop-color="#f6a9c0"/><stop offset=".35" stop-color="#ffd9e4"/><stop offset=".8" stop-color="#fff6f8"/><stop offset="1" stop-color="#fffdfd"/></radialGradient>
+      <radialGradient id="skEye"><stop offset="0" stop-color="#c2305a"/><stop offset="1" stop-color="#f39ab2"/></radialGradient>
+      <linearGradient id="skBark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5d3e33"/><stop offset=".55" stop-color="#3b2620"/><stop offset="1" stop-color="#24150f"/></linearGradient>
+    </defs>`;
+    const main = limb([[-10, 4], [28, 11], [66, 19], [106, 27], [146, 39], [196, 62]], 8.5, 1.6, 7);
+    const sub1 = limb([main.at(0.34), [72, 34], [79, 47], [92, 60]], 3.6, 1, 3);
+    const sub2 = limb([main.at(0.6), [121, 41], [130, 51], [143, 58]], 3, 0.9, 5);
+    const twig1 = limb([main.at(0.45), [92, 15], [97, 6], [101, 0]], 2.4, 0.8, 9);
+    const twig2 = limb([main.at(0.78), [164, 41], [176, 40], [186, 42]], 2, 0.7, 11);
+    s += sub1.svg + sub2.svg + twig1.svg + twig2.svg + main.svg;
+    s += cluster(...main.at(0.18), [6.4, 'b', 5.8], 2);
+    s += cluster(...main.at(0.5), [6.8, 7.2, 'b'], 4);
+    s += cluster(...main.at(0.7), [6.2, 6.6, 6], 6);
+    s += cluster(...main.at(0.9), ['b', 5.4], 8);
+    s += cluster(...sub1.at(0.65), [6, 'b', 6.4], 10);
+    s += cluster(...sub2.at(0.7), [5.6, 5.8], 12);
+    s += cluster(...twig1.at(0.8), [5.4, 'b'], 14);
+    s += cluster(...twig2.at(0.85), ['b', 5.2], 16);
     return s;
   }
 
@@ -179,7 +252,7 @@
   #sk .haze { position: absolute; inset: 0; background: radial-gradient(ellipse at 90% 110%, rgba(255,255,255,.7), transparent 50%); }
   #sk canvas { position: absolute; inset: 0; width: 300px; height: 180px; }
   #sk canvas.back { filter: blur(1.1px); opacity: .75; }
-  #sk svg.branch { position: absolute; left: 0; top: 0; width: 190px; height: 92px; }
+  #sk svg.branch { position: absolute; left: 0; top: 0; width: 200px; height: 92px; }
   #sk .num { position: absolute; left: 20px; top: 70px; font-size: 56px; font-weight: 300; line-height: 1; letter-spacing: -1px; color: var(--zc);
     text-shadow: 0 1px 0 rgba(255,255,255,.8), 0 0 18px rgba(255,255,255,.9); }
   #sk .num.word { font-size: 40px; top: 78px; }
@@ -208,7 +281,7 @@
   <div id="sk" class="stale">
     <div class="haze"></div>
     <canvas class="back" id="skBack"></canvas>
-    <svg class="branch" id="skBranch" viewBox="0 0 190 92"></svg>
+    <svg class="branch" id="skBranch" viewBox="0 0 200 92"></svg>
     <div class="num" id="skNum">---</div><div class="unit">mg/dL</div>
     <div class="side">
       <span class="chip"><svg viewBox="0 0 24 24" id="skFlower"></svg><span id="skZone">No signal</span></span>
@@ -222,7 +295,7 @@
 `,
     init() {
       $('skBranch').innerHTML = branch();
-      $('skFlower').innerHTML = flower(12, 12, 10.5, 0, 1).split('url(#skPet)').join('currentColor');
+      $('skFlower').innerHTML = flower(12, 12, 10.5, 0, 1).split('url(#skPet)').join('currentColor').split('url(#skEye)').join('#fff');
       start();
     },
     render(c) {
