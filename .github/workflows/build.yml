@@ -41,10 +41,25 @@ jobs:
           Get-ChildItem $app -Recurse | Select-Object FullName, Length | Format-Table -AutoSize | Out-String -Width 200
           "VERSION=$v" | Out-File -FilePath $env:GITHUB_ENV -Append
 
+      - name: Build the installer
+        shell: pwsh
+        run: |
+          $iscc = (Get-Command iscc.exe -ErrorAction SilentlyContinue).Source
+          if (-not $iscc) { $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" }
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup --no-progress -y | Out-Null
+            $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          }
+          & $iscc "/DMyAppVersion=$env:VERSION" "installer/GlucoseWidget.iss"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          Get-ChildItem dist | Select-Object Name, Length | Format-Table -AutoSize | Out-String -Width 200
+
       - uses: actions/upload-artifact@v4
         with:
           name: GlucoseWidget-v${{ env.VERSION }}
-          path: dist/*.zip
+          path: |
+            dist/*.zip
+            dist/*.exe
 
       - name: Publish as a release
         shell: pwsh
@@ -54,7 +69,7 @@ jobs:
           $tag = "v$env:VERSION"
           gh release view $tag 2>$null
           if ($LASTEXITCODE -eq 0) {
-            gh release upload $tag "dist/GlucoseWidget-v$env:VERSION.zip" --clobber
+            gh release upload $tag "dist/GlucoseWidget-v$env:VERSION.zip" "dist/GlucoseWidget-Setup-v$env:VERSION.exe" --clobber
           } else {
-            gh release create $tag "dist/GlucoseWidget-v$env:VERSION.zip" --title "Glucose Widget $tag" --notes "Unzip, then double-click GlucoseWidget.exe. See START HERE.txt inside."
+            gh release create $tag "dist/GlucoseWidget-v$env:VERSION.zip" "dist/GlucoseWidget-Setup-v$env:VERSION.exe" --title "Glucose Widget $tag" --notes "Easiest: download GlucoseWidget-Setup and double-click it. Or download the zip, unzip it, and double-click GlucoseWidget.exe."
           }
