@@ -32,7 +32,12 @@ STEP 1 - On your iPhone: turn on Share
       The widget only gets numbers if Share is on with a follower.
    Note: Dexcom Stelo has no Share, so it cannot work with this widget.
 
-STEP 2 - On your PC: put the folder somewhere it can live forever
+STEP 2 - On your PC: install it
+   EASIEST: double-click "GlucoseWidget-Setup" and click Next until it
+   finishes. It puts the widget in your Start menu and opens it.
+   (No admin password needed. Then skip to STEP 4.)
+
+   OR, using the zip instead: put the folder somewhere it can live forever
    1. Move the whole "GlucoseWidget" folder to a permanent
       spot, for example  C:\GlucoseWidget
       (Do this BEFORE the first run. The widget starts itself with
