@@ -34,6 +34,7 @@
     testSettings: (form) => invoke('settings-test', form),
     saveSettings: (form) => invoke('settings-save', form),
     closeSettings: () => send('settings-close'),
+    closeWelcome: () => send('welcome-close'),
   };
 
   // The widget has no title bar: press anywhere that is not a button to drag it.

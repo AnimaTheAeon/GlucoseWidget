@@ -225,16 +225,22 @@ namespace GlucoseWidget
     }
 
     // Built once in the background and then kept: closing just hides it, so it opens instantly.
+    // Also used for the first-run setup guide (welcome.html), which closes for good instead of hiding.
     public class SettingsForm : Form
     {
         readonly App app;
         readonly WebView2 web;
+        readonly string page;
+        readonly int pageW, pageH;
         bool ready, wantShow, forceClose, warming;
 
-        public SettingsForm(App app)
+        public SettingsForm(App app, string page = "settings.html", string title = null, int width = 470, int height = 800, bool keepAlive = true)
         {
             this.app = app;
-            Text = App.Name + " Settings";
+            this.page = page;
+            pageW = width; pageH = height;
+            if (!keepAlive) forceClose = true;
+            Text = title ?? App.Name + " Settings";
             StartPosition = FormStartPosition.Manual;
             BackColor = Color.FromArgb(20, 25, 34);
             MinimizeBox = false; MaximizeBox = false;
@@ -252,8 +258,8 @@ namespace GlucoseWidget
             try
             {
                 CreateHandle();
-                ClientSize = new Size(470 * DeviceDpi / 96, 800 * DeviceDpi / 96);
-                await WebHost.Attach(app, this, web, "settings.html");
+                ClientSize = new Size(pageW * DeviceDpi / 96, pageH * DeviceDpi / 96);
+                await WebHost.Attach(app, this, web, page);
                 web.CoreWebView2.NavigationCompleted += (s, e) =>
                 {
                     ready = true;

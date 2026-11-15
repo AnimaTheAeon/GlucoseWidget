@@ -22,7 +22,7 @@ namespace GlucoseWidget
         public Settings Settings;
         public CoreWebView2Environment WebEnv;
         WidgetForm widget;
-        SettingsForm settingsForm;
+        SettingsForm settingsForm, welcomeForm;
         readonly NotifyIcon tray;
         readonly ContextMenuStrip menu;
         readonly Control ui; // used to run code on the UI thread
@@ -92,7 +92,7 @@ namespace GlucoseWidget
             warm.Tick += (s, e) => { warm.Stop(); warm.Dispose(); EnsureSettingsForm(); };
             warm.Start();
             if (IsConfigured()) Schedule(500);
-            else { status = "setup"; message = "Open Settings to log in"; OpenSettings(); }
+            else { status = "setup"; message = "Open Settings to log in"; OpenWelcome(); }
         }
 
         // ---------- secrets / config ----------
@@ -286,6 +286,18 @@ namespace GlucoseWidget
 
         public void OpenSettings() => EnsureSettingsForm().Present();
 
+        // First-run guide: helps a new user turn on Dexcom Share, log in, and pick alerts and a look.
+        public void OpenWelcome()
+        {
+            if (welcomeForm == null || welcomeForm.IsDisposed)
+            {
+                welcomeForm = new SettingsForm(this, "welcome.html", "Welcome to " + Name, 540, 660, keepAlive: false);
+                welcomeForm.FormClosed += (s, e) => welcomeForm = null;
+                welcomeForm.Warm();
+            }
+            welcomeForm.Present();
+        }
+
         public void SavePosition(Point p)
         {
             Settings.posX = p.X; Settings.posY = p.Y;
@@ -337,6 +349,7 @@ namespace GlucoseWidget
             menu.Items.Add("Show widget", null, (s, e) => ShowWidget());
             menu.Items.Add(snoozed ? "Turn alerts back on" : $"Snooze alerts for {Settings.snoozeMin:0} min", null, (s, e) => SetSnooze(!snoozed));
             menu.Items.Add("Settings…", null, (s, e) => OpenSettings());
+            menu.Items.Add("Setup guide…", null, (s, e) => OpenWelcome());
             menu.Items.Add(new ToolStripSeparator());
             AddCheck("Always on top", Settings.alwaysOnTop, v => { Settings.alwaysOnTop = v; Settings.Save(); widget?.ApplyTopMost(); });
             AddCheck("Minimise to tray (no taskbar icon)", Settings.minToTray, v => { Settings.minToTray = v; Settings.Save(); ApplyTaskbar(); });
@@ -452,6 +465,7 @@ namespace GlucoseWidget
                     return true;
                 }
                 case "settings-close": settingsForm?.Hide(); return null;
+                case "welcome-close": welcomeForm?.Close(); ShowWidget(); return null;
             }
             return null;
         }
@@ -466,6 +480,7 @@ namespace GlucoseWidget
             tray.Dispose();
             widget?.ForceClose();
             settingsForm?.ForceClose();
+            welcomeForm?.Close();
             ExitThread();
         }
     }
