@@ -44,15 +44,13 @@ STEP 3 - Start it
       click "More info", then "Run anyway". (It shows this for any
       app that was not bought from a big company.)
 
-STEP 4 - Log in
-   1. A Settings window opens by itself the first time.
-   2. Type your Dexcom username and password. Use YOUR login, the one
-      on the phone that wears the sensor. Not a follower login.
-   3. Click "Test connection". You want to see the green
-      "It works! Latest reading: ..." message.
-   4. Click the three "Hear ... sound" buttons so you know what the
-      dings sound like, and set the volume.
-   5. Click "Save".
+STEP 4 - Follow the setup guide
+   1. The first time it starts, a "Welcome" window opens by itself.
+   2. It walks you through everything: turning on Share on your
+      phone, typing your Dexcom login, testing it, picking when it
+      should ding, and choosing a look. Click "Next" on each page.
+   3. Click "Finish" at the end.
+   (Want to see it again later? Right-click the widget > Setup guide.)
 
 That's it. The number shows up in the box within a few seconds.
 

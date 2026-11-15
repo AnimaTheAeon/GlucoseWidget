@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:">
+<title>Welcome to Glucose Widget</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: #141922; color: #e8ecf2; font: 14px/1.45 "Segoe UI", system-ui, sans-serif; display: flex; flex-direction: column; }
+  header { padding: 18px 26px 0; }
+  .dots { display: flex; gap: 6px; }
+  .dots i { flex: 1; height: 4px; border-radius: 2px; background: #2a3344; }
+  .dots i.on { background: #3ddc84; }
+  .count { margin-top: 8px; font-size: 12px; color: #8a93a3; }
+  main { flex: 1; overflow: auto; padding: 6px 26px 10px; }
+  section { display: none; }
+  section.on { display: block; animation: in .25s ease-out; }
+  @keyframes in { from { opacity: 0; transform: translateX(10px); } }
+  h1 { font-size: 22px; margin: 8px 0 6px; }
+  h2 { font-size: 15px; margin: 18px 0 6px; color: #3ddc84; }
+  p { margin: 6px 0; color: #c8d0dc; }
+  .big { font-size: 15px; color: #e8ecf2; }
+  ol { margin: 6px 0; padding-left: 22px; } ol li { margin: 6px 0; color: #c8d0dc; }
+  ol li b, p b { color: #fff; }
+  .note { margin: 12px 0; padding: 10px 12px; border-radius: 8px; background: #1b2232; border-left: 3px solid #3d7bdc; color: #c8d0dc; font-size: 13px; }
+  .note.warn { border-left-color: #ffb020; }
+  .note.red { border-left-color: #ff4d4f; }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .choice { padding: 14px; border-radius: 10px; border: 1px solid #36425a; background: #1b2232; cursor: pointer; text-align: left; color: #e8ecf2; font: inherit; }
+  .choice b { display: block; font-size: 15px; margin-bottom: 2px; }
+  .choice span { font-size: 12px; color: #8a93a3; }
+  .choice:hover { border-color: #4a5a78; }
+  .choice.sel { border-color: #3ddc84; box-shadow: 0 0 0 1px #3ddc84 inset; }
+  label { display: block; margin: 10px 0 3px; color: #b8c1d1; }
+  input, select { width: 100%; padding: 8px 10px; border-radius: 7px; border: 1px solid #36425a; background: #0e1219; color: #fff; font: inherit; }
+  input[type=range] { padding: 0; }
+  .row { display: flex; gap: 12px; } .row > div { flex: 1; }
+  .hint { font-size: 12px; color: #8a93a3; margin-top: 3px; }
+  #result { margin-top: 10px; min-height: 22px; font-size: 13px; }
+  .good { color: #3ddc84; } .bad { color: #ff9a9c; }
+  button { padding: 9px 16px; border-radius: 7px; border: 1px solid #36425a; background: #1e2636; color: #fff; font: inherit; cursor: pointer; }
+  button:hover { background: #2a3550; }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary { background: #2e9e63; border-color: #2e9e63; }
+  button.primary:hover { background: #35b371; }
+  button.small { padding: 5px 10px; font-size: 12px; }
+  footer { display: flex; gap: 8px; align-items: center; padding: 12px 26px 18px; border-top: 1px solid #222a38; }
+  footer .grow { flex: 1; }
+  .skip { background: none; border: 0; color: #8a93a3; padding: 9px 4px; }
+  .skip:hover { background: none; color: #c8d0dc; text-decoration: underline; }
+  .tabs { display: flex; gap: 6px; margin-top: 10px; }
+  .tabs button { flex: 1; }
+  .tabs button.sel { border-color: #3ddc84; color: #3ddc84; }
+  .check { display: flex; gap: 8px; align-items: center; margin-top: 12px; cursor: pointer; }
+  .check input { width: auto; }
+</style>
+</head>
+<body>
+  <header>
+    <div class="dots" id="dots"></div>
+    <div class="count" id="count"></div>
+  </header>
+
+  <main>
+    <!-- 1. welcome -->
+    <section data-step="welcome">
+      <h1>Welcome to Glucose Widget 👋</h1>
+      <p class="big">This little box sits on your desktop and shows your Dexcom glucose number. It dings when you go too high or too low, so you notice even while you're working.</p>
+      <p>This guide takes about <b>5 minutes</b>. You'll need:</p>
+      <ol>
+        <li>Your <b>phone</b> with the Dexcom app on it (the one that talks to the sensor).</li>
+        <li>Your <b>Dexcom username and password</b>, the same ones you use in that app.</li>
+      </ol>
+      <div class="note red"><b>Please read:</b> this widget is a helper, not a medical device. Keep the alarms on your phone or receiver turned on, and always make treatment decisions from your Dexcom app, not from this widget.</div>
+    </section>
+
+    <!-- 2. which sensor -->
+    <section data-step="sensor">
+      <h1>Which Dexcom do you use?</h1>
+      <p>Pick the app on your phone that shows your glucose.</p>
+      <div class="choices">
+        <button class="choice" data-sensor="g7"><b>Dexcom G7</b><span>The Dexcom G7 app</span></button>
+        <button class="choice" data-sensor="g6"><b>Dexcom G6</b><span>The Dexcom G6 app</span></button>
+        <button class="choice" data-sensor="stelo"><b>Dexcom Stelo</b><span>The over-the-counter sensor</span></button>
+        <button class="choice" data-sensor="ns"><b>I use Nightscout</b><span>My own Nightscout website</span></button>
+      </div>
+      <div class="note warn" id="steloNote" hidden><b>Sorry, Stelo can't be used.</b> This widget gets your numbers through Dexcom's <b>Share</b> feature, and the Stelo app doesn't have Share. You can still finish the guide if you also use Nightscout.</div>
+    </section>
+
+    <!-- 3. phone: turn on Share -->
+    <section data-step="phone">
+      <h1>Turn on Share on your phone</h1>
+      <p>The widget reads your numbers from Dexcom's <b>Share</b> feature (the same one the Dexcom Follow app uses). Share only sends numbers when <b>at least one follower has accepted</b> an invitation.</p>
+      <div class="tabs"><button data-tab="g7">G7 app</button><button data-tab="g6">G6 app</button></div>
+      <div id="tab-g7">
+        <ol>
+          <li>Open the <b>Dexcom G7</b> app.</li>
+          <li>Tap <b>Connections</b> at the bottom, then tap <b>Share</b>.</li>
+          <li>If it's your first time, read the screens and tap <b>Next</b>.</li>
+          <li>Tap <b>Invite Follower</b>, type a name and email, and send the invitation.</li>
+          <li>The follower opens the email and taps <b>Accept invitation</b> in the <b>Dexcom Follow</b> app.</li>
+          <li>Back on the Share screen, the <b>Status</b> should say <b>Working</b>.</li>
+        </ol>
+      </div>
+      <div id="tab-g6" hidden>
+        <ol>
+          <li>Open the <b>Dexcom G6</b> app.</li>
+          <li>Tap <b>Share</b> (on the main screen or in the menu).</li>
+          <li>Turn Share on and tap <b>Invite Followers</b>.</li>
+          <li>Type the follower's name and email and send the invitation.</li>
+          <li>The follower opens the email and taps <b>Accept invitation</b> in the <b>Dexcom Follow</b> app.</li>
+        </ol>
+      </div>
+      <div class="note"><b>No one to invite?</b> Invite <b>yourself</b> using a second email address, then accept it in the free Dexcom Follow app. That's enough for the widget to work.</div>
+      <div class="note warn"><b>Keep your phone sharing:</b> it needs internet, Bluetooth on, and the Dexcom app running in the background. On iPhone, leave <b>Background App Refresh</b> on for the Dexcom app and avoid <b>Low Power Mode</b>, or numbers can arrive late.</div>
+      <label class="check"><input type="checkbox" id="shareDone"> Share is on and a follower has accepted</label>
+    </section>
+
+    <!-- 4. log in -->
+    <section data-step="login">
+      <h1 id="loginTitle">Log in to Dexcom</h1>
+      <div id="shareBox">
+        <p>Use the <b>same login as your Dexcom app</b>, the account of the person wearing the sensor. <b>Not</b> a follower's login.</p>
+        <label for="username">Dexcom username (or email)</label>
+        <input id="username" autocomplete="off" spellcheck="false">
+        <label for="password">Dexcom password</label>
+        <input id="password" type="password" autocomplete="off">
+        <div class="hint">Saved on this PC only, locked by Windows. It is never sent anywhere except Dexcom.</div>
+        <label for="region">Where you live</label>
+        <select id="region">
+          <option value="us">United States</option>
+          <option value="ous">Outside the United States</option>
+          <option value="jp">Japan</option>
+        </select>
+      </div>
+      <div id="nsBox" hidden>
+        <p>Type your Nightscout website address.</p>
+        <label for="nsUrl">Nightscout address</label>
+        <input id="nsUrl" placeholder="https://my-nightscout.example.com" spellcheck="false">
+        <label for="nsSecret">API secret (leave empty if your site is open)</label>
+        <input id="nsSecret" type="password" autocomplete="off">
+      </div>
+      <p style="margin-top:14px"><button id="test" class="primary">Test connection</button></p>
+      <div id="result"></div>
+    </section>
+
+    <!-- 5. alerts -->
+    <section data-step="alerts">
+      <h1>When should it ding?</h1>
+      <p>The widget dings and flashes when your number goes past these. You can change them any time in Settings.</p>
+      <div class="row">
+        <div><label for="low">Ding when below</label><input id="low" type="number" min="40" max="120"></div>
+        <div><label for="high">Ding when above</label><input id="high" type="number" min="120" max="400"></div>
+      </div>
+      <div class="hint">Not sure? Ask your doctor what your low and high numbers should be.</div>
+      <label for="volume">Volume</label>
+      <input id="volume" type="range" min="0" max="1" step="0.05">
+      <p style="margin-top:10px">
+        <button class="small" data-sound="low">Hear LOW sound</button>
+        <button class="small" data-sound="high">Hear HIGH sound</button>
+        <button class="small" data-sound="stale">Hear "no data" sound</button>
+      </p>
+      <div class="hint">It also warns you if no new number arrives for 20 minutes.</div>
+    </section>
+
+    <!-- 6. look -->
+    <section data-step="look">
+      <h1>Pick a look</h1>
+      <p>Choose how the widget looks. You can switch any time in Settings.</p>
+      <label for="theme">Theme</label>
+      <select id="theme"></select>
+      <label class="check"><input type="checkbox" id="minToTray"> Hide in the tray by the clock instead of the taskbar</label>
+    </section>
+
+    <!-- 7. done -->
+    <section data-step="done">
+      <h1>All set! 🎉</h1>
+      <p class="big">Click <b>Finish</b> and your widget appears in the bottom-right corner of your screen.</p>
+      <ol>
+        <li><b>Drag</b> it anywhere you like. It remembers the spot.</li>
+        <li>🔔 <b>Bell</b> = snooze the dings for 30 minutes.</li>
+        <li>⚙ <b>Gear</b> = Settings (change your login, alerts or look).</li>
+        <li>⬇ <b>Arrow</b> = hide it. It pops back up by itself if you go high or low.</li>
+        <li><b>Right-click</b> it for more, like "Start with Windows".</li>
+      </ol>
+      <div class="note">You can open this guide again any time: right-click the widget and pick <b>Setup guide</b>.</div>
+    </section>
+  </main>
+
+  <footer>
+    <button id="back">Back</button>
+    <span class="grow"></span>
+    <button class="skip" id="skip">Skip guide</button>
+    <button class="primary" id="next">Next</button>
+  </footer>
+<script src="bridge.js"></script>
+<script src="sounds.js"></script>
+<script src="welcome.js"></script>
+</body>
+</html>
