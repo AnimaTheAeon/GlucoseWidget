@@ -47,7 +47,7 @@ namespace GlucoseWidget
             Settings = Settings.Load();
             // themes used to be saved by their short file names
             var renamed = new Dictionary<string, string> { { "classic", "Classic" }, { "reactor", "Reactor Timer" }, { "farm", "Farm Sign" },
-                { "neon", "Night City HUD" }, { "og", "Green Orb" }, { "glass", "Liquid Glass" } };
+                { "neon", "Night City HUD" }, { "og", "Green Orb" }, { "glass", "Dark Glass" }, { "Liquid Glass", "Dark Glass" } };
             if (renamed.TryGetValue(Settings.theme ?? "", out var newName)) { Settings.theme = newName; Settings.Save(); }
             ui = new Control();
             ui.CreateControl();

@@ -1,7 +1,7 @@
-// @theme {"id": "glass", "name": "Liquid Glass", "width": 300, "height": 180}
-// Glucose Widget theme: "Liquid Glass". Delete this file to remove the theme; put it back to restore it.
+// @theme {"id": "glass", "name": "Dark Glass", "width": 300, "height": 180}
+// Glucose Widget theme: "Dark Glass". Delete this file to remove the theme; put it back to restore it.
 (function () {
-  // Liquid glass theme: smooth white line with a soft fill.
+  // Dark Glass theme: smooth white line with a soft fill.
   function drawLgChart(s) {
     const W = 264; const H = 30;
     const now = Date.now(); const span = 3 * 3600000;
@@ -34,7 +34,7 @@
     id: 'glass',
     palette: {"ok": "#30d158", "high": "#ff9f0a", "low": "#ff453a", "stale": "#8e8e93"},
     css: String.raw`
-  /* ---- Liquid glass theme (dark) ---- */
+  /* ---- Dark Glass theme ---- */
   #lg { display: none; }
   body.glass #card { inset: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
   body.glass #card > *:not(#lg):not(#top) { display: none; }
