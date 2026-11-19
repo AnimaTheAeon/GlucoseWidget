@@ -104,7 +104,7 @@ The looks (pick in Settings > Look > Theme):
                    tube along the bottom is your last 3 hours, with
                    light flowing along it. The two dotted lines are
                    your high and low limits.
-- Dark Glass   = dark, shiny glass slab like the newest iPhone
+- Dark Glass     = dark, shiny glass slab like the newest iPhone
                    widgets. The glow inside turns green, orange, red
                    or gray with your number.
 

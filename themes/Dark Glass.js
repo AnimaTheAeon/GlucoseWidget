@@ -34,7 +34,7 @@
     id: 'glass',
     palette: {"ok": "#30d158", "high": "#ff9f0a", "low": "#ff453a", "stale": "#8e8e93"},
     css: String.raw`
-  /* ---- Dark Glass theme (dark) ---- */
+  /* ---- Dark Glass theme ---- */
   #lg { display: none; }
   body.glass #card { inset: 0; padding: 0; border: 0; border-radius: 0; background: transparent; }
   body.glass #card > *:not(#lg):not(#top) { display: none; }
